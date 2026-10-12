@@ -1,34 +1,1362 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人网站</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .card {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarsOfDeduce · 演绎之星 | 探索 Windows 极限美学与底层交互</title>
+  <meta name="description" content="StarsOfDeduce 的个人主页与作品集。热爱桌面美化、毛玻璃拟物交互、Electron 与 C++ 底层调优。Tar V 作者。">
+  <link rel="icon" href="./avatar.png" type="image/png">
+  <style>
+    :root {
+      --bg-base: #0a0d14;
+      --bg-surface: rgba(18, 24, 38, 0.65);
+      --bg-surface-hover: rgba(26, 34, 52, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.4);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+      --card-blur: blur(20px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 背景星空与宇宙微光 */
+    #space-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+      animation: floatGlow 18s ease-in-out infinite alternate;
+    }
+
+    .glow-1 {
+      top: -10%;
+      left: 15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.5) 0%, transparent 70%);
+    }
+
+    .glow-2 {
+      bottom: 5%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.35) 0%, transparent 70%);
+      animation-delay: -9s;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(60px, 40px) scale(1.15); }
+    }
+
+    /* 整体容器 */
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 24px 60px;
+    }
+
+    /* 顶部导航 */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px;
+      background: var(--bg-surface);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border: 1px solid var(--border-subtle);
+      border-radius: 100px;
+      margin-bottom: 32px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: #34d399;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border: 1px solid rgba(165, 180, 252, 0.3);
+      color: white;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Bento Grid 主栅格 */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+
+    /* 卡片通用毛玻璃样式 */
+    .bento-card {
+      background: var(--bg-surface);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    .bento-card:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 16px 48px -12px rgba(99, 102, 241, 0.25);
+      transform: translateY(-3px);
+    }
+
+    .card-spotlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(600px circle at var(--mouse-x, -500px) var(--mouse-y, -500px), rgba(255, 255, 255, 0.06), transparent 40%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 徽章胶囊 */
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+
+    .badge-cyan {
+      background: rgba(0, 242, 254, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .badge-purple {
+      background: rgba(139, 92, 246, 0.12);
+      color: #a78bfa;
+      border: 1px solid rgba(167, 139, 250, 0.25);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.25);
+    }
+
+    /* ========================================================
+       卡片 1: Hero 主角介绍 (占据 7 列)
+       ======================================================== */
+    .card-hero {
+      grid-column: span 7;
+    }
+
+    .hero-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .hero-avatar-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    .hero-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      position: relative;
+      z-index: 2;
+    }
+
+    .avatar-halo {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+      z-index: 1;
+      opacity: 0.8;
+      animation: rotateHalo 8s linear infinite;
+    }
+
+    @keyframes rotateHalo {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hero-meta h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .hero-tagline {
+      font-size: 0.95rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+
+    .hero-desc {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    /* ========================================================
+       卡片 2: 实时推演与极客状态 (占据 5 列)
+       ======================================================== */
+    .card-metrics {
+      grid-column: span 5;
+    }
+
+    .metrics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 10px;
+      height: 100%;
+      justify-content: space-around;
+    }
+
+    .metric-item {
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      transition: background 0.2s ease;
+    }
+
+    .metric-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-mono);
+      letter-spacing: -0.02em;
+    }
+
+    .highlight-purple {
+      color: #c084fc;
+    }
+
+    .highlight-cyan {
+      color: #38bdf8;
+    }
+
+    /* ========================================================
+       卡片 3: 王牌作品 Tar V Showcase (占据 8 列)
+       ======================================================== */
+    .card-featured-project {
+      grid-column: span 8;
+      background: linear-gradient(135deg, rgba(24, 32, 54, 0.8) 0%, rgba(15, 20, 32, 0.7) 100%);
+    }
+
+    .project-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+
+    .project-title-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .project-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .project-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .project-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* 仿 Tar V 拟物毛玻璃小窗演示 */
+    .mock-launcher {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .mock-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+
+    .mock-tab {
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mock-tab.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(165, 180, 252, 0.2);
+    }
+
+    .mock-items {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .mock-icon-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mock-icon-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .mock-icon-svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .mock-icon-name {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tech-tag {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ========================================================
+       卡片 4: 极客脚本 WindHawk (占据 4 列)
+       ======================================================== */
+    .card-secondary-project {
+      grid-column: span 4;
+    }
+
+    .sec-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: #fbbf24;
+    }
+
+    /* ========================================================
+       卡片 5: 技术栈矩阵 (占据 6 列)
+       ======================================================== */
+    .card-tech-matrix {
+      grid-column: span 6;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .tech-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      transition: all 0.25s ease;
+    }
+
+    .tech-cell:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .tech-cell-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tech-cell-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* ========================================================
+       卡片 6: 专注音乐律动 (占据 3 列)
+       ======================================================== */
+    .card-sound {
+      grid-column: span 3;
+    }
+
+    .sound-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      gap: 14px;
+      padding: 10px 0;
+    }
+
+    .sound-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 36px;
+    }
+
+    .sound-bar {
+      width: 4px;
+      background: linear-gradient(to top, var(--accent-cyan), var(--accent-purple));
+      border-radius: 4px;
+      height: 8px;
+    }
+
+    .playing .bar-1 { animation: waveBar 1.2s ease-in-out infinite alternate; }
+    .playing .bar-2 { animation: waveBar 0.9s ease-in-out infinite alternate 0.2s; }
+    .playing .bar-3 { animation: waveBar 1.4s ease-in-out infinite alternate 0.4s; }
+    .playing .bar-4 { animation: waveBar 1.0s ease-in-out infinite alternate 0.1s; }
+    .playing .bar-5 { animation: waveBar 1.3s ease-in-out infinite alternate 0.3s; }
+
+    @keyframes waveBar {
+      0% { height: 6px; }
+      100% { height: 32px; }
+    }
+
+    .sound-track-info {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .sound-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sound-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: scale(1.08);
+    }
+
+    /* ========================================================
+       卡片 7: 信条与座右铭 (占据 3 列)
+       ======================================================== */
+    .card-creed {
+      grid-column: span 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .creed-quote {
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: #e5e7eb;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .creed-author {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      text-align: right;
+    }
+
+    /* ========================================================
+       卡片 8: 联络与社交矩阵 (占据 12 列完整宽度)
+       ======================================================== */
+    .card-connect {
+      grid-column: span 12;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 24px 32px;
+    }
+
+    .connect-text h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .connect-text p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .connect-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast 弹窗反馈 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 页脚 */
+    .footer {
+      text-align: center;
+      padding-top: 48px;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* 移动端与平板响应式断点 */
+    @media (max-width: 992px) {
+      .card-hero { grid-column: span 12; }
+      .card-metrics { grid-column: span 12; }
+      .card-featured-project { grid-column: span 12; }
+      .card-secondary-project { grid-column: span 12; }
+      .card-tech-matrix { grid-column: span 12; }
+      .card-sound { grid-column: span 6; }
+      .card-creed { grid-column: span 6; }
+      .mock-items { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .app-container { padding: 16px 14px 40px; }
+      .navbar { flex-direction: column; gap: 14px; border-radius: 20px; }
+      .card-sound { grid-column: span 12; }
+      .card-creed { grid-column: span 12; }
+      .card-connect { flex-direction: column; align-items: flex-start; }
+      .mock-items { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>你好，世界！</h1>
-        <p>这是我的第一个 GitHub Pages 网站。</p>
-    </div>
+  <!-- 动态星空画布 -->
+  <canvas id="space-canvas"></canvas>
+  
+  <!-- 氛围渐变光斑 -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- 提示弹窗 -->
+  <div id="toast" class="toast">已成功复制邮箱至剪贴板 ✨</div>
+
+  <div class="app-container">
+    <!-- 顶部导航条 -->
+    <header class="navbar">
+      <a href="#" class="nav-brand">
+        <img src="./avatar.png" alt="StarsOfDeduce" class="brand-avatar">
+        <span class="brand-title">StarsOfDeduce</span>
+      </a>
+
+      <div class="nav-status">
+        <span class="status-dot"></span>
+        <span id="greeting-badge">正在推演数字星空</span>
+      </div>
+
+      <div class="nav-actions">
+        <a href="https://github.com/StarsOfDeduce" target="_blank" class="btn-glass">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="#featured" class="btn-glass btn-primary">探索作品</a>
+      </div>
+    </header>
+
+    <!-- Bento Grid 便当盒核心栅格 -->
+    <main class="bento-grid">
+
+      <!-- 卡片 1: Hero 主角介绍 -->
+      <section class="bento-card card-hero">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-cyan">
+            <span>✨ 独立开发者 & 探索者</span>
+          </div>
+
+          <div class="hero-header">
+            <div class="hero-avatar-wrapper">
+              <div class="avatar-halo"></div>
+              <img src="./avatar.png" alt="StarsOfDeduce" class="hero-avatar">
+            </div>
+            <div class="hero-meta">
+              <h1>StarsOfDeduce</h1>
+              <p class="hero-tagline">Windows 极客 · 毛玻璃拟物美学 · 交互架构</p>
+            </div>
+          </div>
+
+          <p class="hero-desc">
+            你好，欢迎来到我的数字星空！我是一名专注于桌面端极致体验与系统定制的开发者。
+            热衷于研究 <strong>Electron 动效架构</strong>、<strong>Windows 底层机制</strong> 与 <strong>毛玻璃拟物交互</strong>。
+            我坚信：优秀的软件不仅要运行如飞，更应拥有令人愉悦的视听质感。
+          </p>
+
+          <div class="hero-actions">
+            <a href="https://github.com/StarsOfDeduce/Tar-V" target="_blank" class="btn-glass btn-primary">
+              🚀 核心开源：Tar V
+            </a>
+            <a href="https://github.com/StarsOfDeduce" target="_blank" class="btn-glass">
+              关注 GitHub
+            </a>
+            <button class="btn-glass" onclick="copyEmail()">
+              ✉️ 复制邮箱
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 2: 实时推演与运行指标 -->
+      <section class="bento-card card-metrics">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-purple">
+            <span>⏱️ 实时指标 · Live Deduction</span>
+          </div>
+
+          <div class="metrics-list">
+            <div class="metric-item">
+              <div class="metric-label">
+                <span>本站平稳运行</span>
+                <span>SYSTEM UPTIME</span>
+              </div>
+              <div class="metric-value highlight-cyan" id="runtime-display">
+                计算中...
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-label">
+                <span>旅行者 1 号距地球 (实时推演)</span>
+                <span>VOYAGER 1 DISTANCE</span>
+              </div>
+              <div class="metric-value highlight-purple" id="voyager-display">
+                24,785,120,410 km
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-label">
+                <span>当前技术探索</span>
+                <span>ACTIVE FOCUS</span>
+              </div>
+              <div class="metric-value" style="font-size: 0.95rem; font-weight: 600;">
+                Electron 30+ · Win32 Hook · C++
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 3: 王牌作品 Tar V Showcase -->
+      <section class="bento-card card-featured-project" id="featured">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-cyan">
+            <span>🌟 拳头开源项目 · Featured Project</span>
+          </div>
+
+          <div class="project-header">
+            <div class="project-title-area">
+              <img src="./tar-v-logo.png" alt="Tar V Logo" class="project-logo">
+              <div>
+                <h2 class="project-title">Tar V</h2>
+                <p style="color: var(--accent-cyan); font-size: 0.85rem;">极简而高级的 Windows 毛玻璃拟物快捷启动面板</p>
+              </div>
+            </div>
+            <a href="https://github.com/StarsOfDeduce/Tar-V" target="_blank" class="btn-glass btn-primary" style="flex-shrink: 0;">
+              查看项目仓库 →
+            </a>
+          </div>
+
+          <p class="project-desc">
+            将杂乱的桌面收纳进一个轻量、优雅、高度可定制的浮动面板中。通过全局快捷键呼出，具备原生图标并发提取、毛玻璃主题自由调色、拖拽编排与死链一键维护。
+          </p>
+
+          <!-- 模拟 Tar V 交互体验舱 -->
+          <div class="mock-launcher">
+            <div class="mock-tabs">
+              <span class="mock-tab active" onclick="switchMockTab(this, '常用工具')">常用工具</span>
+              <span class="mock-tab" onclick="switchMockTab(this, '开发环境')">开发环境</span>
+              <span class="mock-tab" onclick="switchMockTab(this, '系统调优')">系统调优</span>
+            </div>
+            <div class="mock-items" id="mock-items-container">
+              <div class="mock-icon-card" onclick="clickMockApp('VS Code')">
+                <span style="font-size: 1.4rem;">💻</span>
+                <span class="mock-icon-name">VS Code</span>
+              </div>
+              <div class="mock-icon-card" onclick="clickMockApp('Terminal')">
+                <span style="font-size: 1.4rem;">⚡</span>
+                <span class="mock-icon-name">Terminal</span>
+              </div>
+              <div class="mock-icon-card" onclick="clickMockApp('Chrome')">
+                <span style="font-size: 1.4rem;">🌐</span>
+                <span class="mock-icon-name">Browser</span>
+              </div>
+              <div class="mock-icon-card" onclick="clickMockApp('Photoshop')">
+                <span style="font-size: 1.4rem;">🎨</span>
+                <span class="mock-icon-name">Design</span>
+              </div>
+              <div class="mock-icon-card" onclick="clickMockApp('Music')">
+                <span style="font-size: 1.4rem;">🎵</span>
+                <span class="mock-icon-name">Music</span>
+              </div>
+              <div class="mock-icon-card" onclick="clickMockApp('Settings')">
+                <span style="font-size: 1.4rem;">⚙️</span>
+                <span class="mock-icon-name">Settings</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-tags">
+            <span class="tech-tag">Electron</span>
+            <span class="tech-tag">JavaScript / Node.js</span>
+            <span class="tech-tag">Windows API</span>
+            <span class="tech-tag">Glassmorphism UI</span>
+            <span class="tech-tag">MIT License</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 4: 极客脚本 WindHawk -->
+      <section class="bento-card card-secondary-project">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-amber">
+            <span>⚙️ 系统定制 · Geek Script</span>
+          </div>
+
+          <div class="sec-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 8px;">WindHawk 增强模组</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 18px;">
+            针对 Windows 11/10 任务栏、窗口交互及资源管理器深层注入定制的 C++ 脚本集合，让桌面交互回归随心所欲。
+          </p>
+
+          <div class="project-tags" style="margin-bottom: auto;">
+            <span class="tech-tag">C++</span>
+            <span class="tech-tag">Win32 API</span>
+            <span class="tech-tag">System Hook</span>
+          </div>
+
+          <a href="https://github.com/StarsOfDeduce/WindHawk" target="_blank" class="btn-glass" style="margin-top: 16px; width: fit-content;">
+            浏览脚本实现 →
+          </a>
+        </div>
+      </section>
+
+      <!-- 卡片 5: 技术栈矩阵 -->
+      <section class="bento-card card-tech-matrix">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-emerald">
+            <span>🛠️ 技术全景 · Tech Matrix</span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 4px;">熟练掌握与常驻生产力</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">从现代前端视觉呈现到桌面系统深层改造</p>
+
+          <div class="tech-grid">
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #f7df1e;">JS</span>
+              <span class="tech-cell-name">JavaScript</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #3178c6;">TS</span>
+              <span class="tech-cell-name">TypeScript</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #47848f;">⚛️</span>
+              <span class="tech-cell-name">Electron</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #00599c;">C++</span>
+              <span class="tech-cell-name">C / C++</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #68a063;">🟢</span>
+              <span class="tech-cell-name">Node.js</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #e34f26;">🌐</span>
+              <span class="tech-cell-name">HTML5 / CSS3</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #3776ab;">🐍</span>
+              <span class="tech-cell-name">Python</span>
+            </div>
+            <div class="tech-cell">
+              <span class="tech-cell-icon" style="color: #f05032;">📦</span>
+              <span class="tech-cell-name">Git & GitHub</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 6: 专注音乐律动组件 -->
+      <section class="bento-card card-sound">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-purple">
+            <span>🎵 专注氛围 · Ambient</span>
+          </div>
+
+          <div class="sound-player" id="sound-player-box">
+            <div class="sound-bars playing" id="sound-bars">
+              <div class="sound-bar bar-1"></div>
+              <div class="sound-bar bar-2"></div>
+              <div class="sound-bar bar-3"></div>
+              <div class="sound-bar bar-4"></div>
+              <div class="sound-bar bar-5"></div>
+            </div>
+
+            <div class="sound-track-info">
+              <strong style="color: #fff; display: block; font-size: 0.9rem;">Cosmic Stardust</strong>
+              <span style="font-size: 0.75rem;">极客编码律动氛围</span>
+            </div>
+
+            <button class="sound-btn" onclick="toggleSound()" title="播放/暂停声波">
+              <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 7: 信条与座右铭 -->
+      <section class="bento-card card-creed">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="pill-badge badge-cyan">
+            <span>🌌 推演信条 · Creed</span>
+          </div>
+
+          <div class="creed-quote">
+            "把逻辑写成诗篇，把美学注入系统。所谓代码，不过是思维在数字星空里的投影。"
+          </div>
+          <div class="creed-author">
+            — StarsOfDeduce
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 8: 联络与社交矩阵 (底部横幅) -->
+      <section class="bento-card card-connect">
+        <div class="card-spotlight"></div>
+        <div class="card-content" style="width: 100%; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+          <div class="connect-text">
+            <h3>开启灵感交流，或在 GitHub 探讨有趣项目</h3>
+            <p>随时欢迎提出建议、Bug 反馈或跨平台开发交流。</p>
+          </div>
+
+          <div class="connect-links">
+            <a href="https://github.com/StarsOfDeduce" target="_blank" class="btn-glass">
+              🐱 GitHub Profile
+            </a>
+            <button class="btn-glass btn-primary" onclick="copyEmail()">
+              ✉️ 2691048838@qq.com
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 页脚版权与链接 -->
+    <footer class="footer">
+      <p style="margin-bottom: 8px;">
+        Designed & Built with Glassmorphism Aesthetic by <a href="https://github.com/StarsOfDeduce">StarsOfDeduce</a>
+      </p>
+      <p style="font-size: 0.76rem; color: #4b5563;">
+        Powered by GitHub Pages · No External Bloatware · 60FPS Smooth Interaction
+      </p>
+    </footer>
+  </div>
+
+  <!-- 纯原生交互与星空渲染脚本 -->
+  <script>
+    // 1. 动态时间问候语
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      const badge = document.getElementById('greeting-badge');
+      if (hour >= 0 && hour < 6) {
+        badge.innerHTML = '🌙 凌晨好 · 夜猫子推演中';
+      } else if (hour >= 6 && hour < 12) {
+        badge.innerHTML = '☀️ 早安 · 代码与晨光';
+      } else if (hour >= 12 && hour < 18) {
+        badge.innerHTML = '☕ 午后 · 保持专注沉浸';
+      } else {
+        badge.innerHTML = '🌆 晚上好 · 星空灵感迸发';
+      }
+    }
+    updateGreeting();
+
+    // 2. 本站运行时间与旅行者 1 号距离推演
+    const siteStartDate = new Date('2024-07-16T00:00:00'); // 账号注册基准日期
+    function updateMetrics() {
+      const now = new Date();
+      const diff = now - siteStartDate;
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('runtime-display').innerText = 
+        `${days} 天 ${hours} 时 ${minutes} 分 ${seconds} 秒`;
+
+      // 旅行者 1 号距离实时模拟计算 (速度约 17 km/s)
+      const baseDistanceKm = 24785120000;
+      const extraKm = Math.floor((now.getTime() % 86400000) / 1000 * 17);
+      const currentDistance = (baseDistanceKm + extraKm).toLocaleString();
+      document.getElementById('voyager-display').innerText = `${currentDistance} km`;
+    }
+    setInterval(updateMetrics, 1000);
+    updateMetrics();
+
+    // 3. 卡片鼠标跟随高光聚光灯 (Linear 风格微光)
+    document.querySelectorAll('.bento-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // 4. 模拟 Tar V 启动器标签切换与点击微交互
+    const appData = {
+      '常用工具': [
+        { icon: '💻', name: 'VS Code' },
+        { icon: '⚡', name: 'Terminal' },
+        { icon: '🌐', name: 'Browser' },
+        { icon: '🎨', name: 'Design' },
+        { icon: '🎵', name: 'Music' },
+        { icon: '⚙️', name: 'Settings' }
+      ],
+      '开发环境': [
+        { icon: '📦', name: 'Node.js' },
+        { icon: '🐙', name: 'GitHub' },
+        { icon: '🐬', name: 'MySQL' },
+        { icon: '🐳', name: 'Docker' },
+        { icon: '🦀', name: 'Rust' },
+        { icon: '📜', name: 'Scripts' }
+      ],
+      '系统调优': [
+        { icon: '🪟', name: 'WindHawk' },
+        { icon: '🚀', name: 'Tar V' },
+        { icon: '📊', name: 'Process' },
+        { icon: '🛡️', name: 'Security' },
+        { icon: '🧹', name: 'Cleaner' },
+        { icon: '🔧', name: 'Regedit' }
+      ]
+    };
+
+    function switchMockTab(tabElement, category) {
+      document.querySelectorAll('.mock-tab').forEach(t => t.classList.remove('active'));
+      tabElement.classList.add('active');
+
+      const container = document.getElementById('mock-items-container');
+      container.innerHTML = '';
+      appData[category].forEach(app => {
+        const div = document.createElement('div');
+        div.className = 'mock-icon-card';
+        div.onclick = () => clickMockApp(app.name);
+        div.innerHTML = `<span style="font-size: 1.4rem;">${app.icon}</span><span class="mock-icon-name">${app.name}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function clickMockApp(name) {
+      showToast(`已响应拟物调用：${name} 🚀`);
+    }
+
+    // 5. 复制邮箱提示 Toast
+    function copyEmail() {
+      const email = '2691048838@qq.com';
+      navigator.clipboard.writeText(email).then(() => {
+        showToast('已复制邮箱 2691048838@qq.com ✉️');
+      }).catch(() => {
+        showToast('邮箱：2691048838@qq.com');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // 6. 音乐播放律动切换
+    let isPlaying = true;
+    function toggleSound() {
+      isPlaying = !isPlaying;
+      const bars = document.getElementById('sound-bars');
+      const icon = document.getElementById('play-icon');
+      if (isPlaying) {
+        bars.classList.add('playing');
+        icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        showToast('已开启专注声波律动 🎵');
+      } else {
+        bars.classList.remove('playing');
+        icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        showToast('已暂停声波律动 ⏸️');
+      }
+    }
+
+    // 7. 原生 HTML5 Canvas 星空宇宙粒子引擎
+    const canvas = document.getElementById('space-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let stars = [];
+    const STAR_COUNT = 80;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          alpha: Math.random() * 0.7 + 0.3
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, width, height);
+
+      // 绘制粒子与连线 (星宿连线微动效)
+      for (let i = 0; i < stars.length; i++) {
+        const s1 = stars[i];
+        s1.x += s1.vx;
+        s1.y += s1.vy;
+
+        if (s1.x < 0) s1.x = width;
+        if (s1.x > width) s1.x = 0;
+        if (s1.y < 0) s1.y = height;
+        if (s1.y > height) s1.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(s1.x, s1.y, s1.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(165, 180, 252, ${s1.alpha})`;
+        ctx.fill();
+
+        for (let j = i + 1; j < stars.length; j++) {
+          const s2 = stars[j];
+          const dx = s1.x - s2.x;
+          const dy = s1.y - s2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 110) {
+            ctx.beginPath();
+            ctx.moveTo(s1.x, s1.y);
+            ctx.lineTo(s2.x, s2.y);
+            ctx.strokeStyle = `rgba(99, 102, 241, ${0.15 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    drawStars();
+  </script>
 </body>
 </html>
