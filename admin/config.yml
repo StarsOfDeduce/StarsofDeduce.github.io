@@ -2,11 +2,9 @@ backend:
   name: github
   repo: StarsOfDeduce/StarsofDeduce.github.io
   branch: main
-
-# Sveltia CMS 默认使用 GitHub device flow 登录，无需 OAuth 服务器和回调服务，可部署在纯 GitHub Pages 上。
-# 若你改用 Decap CMS + 自托管 OAuth Provider，取消下面两行注释并把域名换成你的服务：
-# base_url: https://your-oauth-provider.example.com
-# auth_endpoint: /auth
+  # 指向自托管在 Cloudflare Worker 上的 GitHub OAuth 网关
+  base_url: https://cmsgtio.account-subdomain.workers.dev
+  auth_endpoint: auth
 
 site_url: https://starsofdeduce.github.io
 display_url: https://starsofdeduce.github.io
