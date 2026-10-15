@@ -1,6 +1,11 @@
-# Tar V 架构与设计：打造 Windows 毛玻璃拟物风启动面板
+---
+title: "Tar V 架构与设计：打造 Windows 毛玻璃拟物风启动面板"
+description: "探索如何利用 Electron 进程分离架构，结合原生 Win32 图标并发提取与深度调教的毛玻璃拟物美学。"
+date: 2026-10-10
+tags: [Electron, Windows, 毛玻璃拟物, 交互设计]
+---
 
-> 发布于 2026-10-10 · 标签：`Electron` `Windows` `毛玻璃拟物` `交互设计` · 阅读时间：约 5 分钟
+# Tar V 架构与设计：打造 Windows 毛玻璃拟物风启动面板
 
 ---
 
