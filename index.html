@@ -5,7 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StarsOfDeduce · 演绎之星 | 探索 Windows 极限美学与底层交互</title>
   <meta name="description" content="StarsOfDeduce 的个人主页与技术博客。热爱桌面美化、毛玻璃拟物交互、Electron 与 C++ 底层调优。Tar V 作者。">
+  <meta name="author" content="StarsOfDeduce">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="canonical" href="https://starsofdeduce.github.io/">
+
+  <!-- Open Graph / 社交分享 -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="StarsOfDeduce · 演绎之星">
+  <meta property="og:title" content="StarsOfDeduce · 演绎之星 | Windows 极客与毛玻璃拟物美学">
+  <meta property="og:description" content="StarsOfDeduce 的个人主页与技术博客。热爱桌面美化、毛玻璃拟物交互、Electron 与 C++ 底层调优。Tar V 作者。">
+  <meta property="og:url" content="https://starsofdeduce.github.io/">
+  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.png">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="StarsOfDeduce · 演绎之星 | Windows 极客与毛玻璃拟物美学">
+  <meta name="twitter:description" content="StarsOfDeduce 的个人主页与技术博客。热爱桌面美化、毛玻璃拟物交互、Electron 与 C++ 底层调优。Tar V 作者。">
+  <meta name="twitter:image" content="https://starsofdeduce.github.io/avatar.png">
+
   <link rel="icon" href="./avatar.png" type="image/png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "StarsOfDeduce",
+    "url": "https://starsofdeduce.github.io/",
+    "jobTitle": "Windows 极客 · 独立开发者",
+    "description": "探索 Windows 极限美学与底层交互的开发者，Tar V（毛玻璃拟物风启动面板）作者。",
+    "sameAs": ["https://github.com/StarsOfDeduce"]
+  }
+  </script>
   <style>
     :root {
       --bg-base: #0a0d14;
@@ -860,6 +888,95 @@
       flex-wrap: wrap;
     }
 
+    /* 卡片: 全部开源项目墙 (GitHub API 动态渲染) */
+    .card-repos {
+      grid-column: span 12;
+    }
+
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    .repo-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      text-decoration: none;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+    }
+
+    [data-theme="light"] .repo-card {
+      background: rgba(15, 23, 42, 0.03);
+    }
+
+    .repo-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-focus);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(99, 102, 241, 0.14);
+    }
+
+    .repo-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+
+    .repo-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+
+    .repo-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .repo-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .repo-lang {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lang-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .repo-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-dim);
+      padding: 30px 0;
+    }
+
     /* Toast 弹窗反馈 */
     .toast {
       position: fixed;
@@ -901,6 +1018,28 @@
 
     .footer a:hover {
       color: var(--accent-cyan);
+    }
+
+    /* 无障碍: 键盘焦点可见 */
+    :focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    ::selection {
+      background: rgba(139, 92, 246, 0.35);
+      color: var(--text-main);
+    }
+
+    /* 无障碍: 尊重减少动效偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .avatar-halo, .status-dot, .sound-bar { animation: none !important; }
     }
 
     /* 响应式适配 */
@@ -1146,6 +1285,28 @@
         </div>
       </section>
 
+      <!-- 卡片: 全部开源项目墙 (动态拉取 GitHub API) -->
+      <section class="bento-card card-repos" id="repos-section">
+        <div class="card-spotlight"></div>
+        <div class="card-content">
+          <div class="blog-header">
+            <div>
+              <div class="pill-badge badge-purple">
+                <span>🗂️ 全部开源 · Open Source Repositories</span>
+              </div>
+              <h2 style="font-size: 1.45rem; font-weight: 700; color: var(--text-main);">我的开源项目总览</h2>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-dim); font-family: var(--font-mono);">
+              数据由 GitHub API 实时拉取
+            </span>
+          </div>
+
+          <div class="repo-grid" id="repo-grid">
+            <div class="repo-empty">正在从 GitHub 推演仓库数据…</div>
+          </div>
+        </div>
+      </section>
+
       <!-- 卡片 5: 新增博客文章专栏 (Blog Section) -->
       <section class="bento-card card-blog-section" id="blog-section">
         <div class="card-spotlight"></div>
@@ -1327,6 +1488,49 @@
 
   <!-- 原生逻辑交互 -->
   <script>
+    // 0. 动态拉取 GitHub 公开仓库（非 fork、按最近更新排序、排除本网站本体）
+    const OWNER = 'StarsOfDeduce';
+    const IGNORED_REPOS = new Set(['StarsofDeduce.github.io']);
+    const LANG_COLORS = {
+      'JavaScript': '#f1e05a', 'TypeScript': '#3178c6', 'C++': '#f34b7d',
+      'C': '#555555', 'C#': '#178600', 'CSS': '#563d7c', 'HTML': '#e34c26',
+      'Python': '#3572A5', 'Shell': '#89e051', 'PowerShell': '#012456',
+      'Vue': '#41b883', 'MDX': '#fcb32c', 'Batchfile': '#C1F12D'
+    };
+
+    function fetchRepos() {
+      const grid = document.getElementById('repo-grid');
+      fetch(`https://api.github.com/users/${OWNER}/repos?sort=updated&per_page=100`)
+        .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+        .then(repos => {
+          const mine = repos.filter(r => !r.fork && !IGNORED_REPOS.has(r.name));
+          if (!mine.length) { grid.innerHTML = '<div class="repo-empty">暂无公开仓库 ✨</div>'; return; }
+          grid.innerHTML = '';
+          mine.slice(0, 12).forEach(repo => {
+            const lang = repo.language;
+            const dotColor = LANG_COLORS[lang] || '#8b5cf6';
+            const a = document.createElement('a');
+            a.className = 'repo-card';
+            a.href = repo.html_url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.innerHTML = `
+              <div class="repo-name">📦 ${repo.name}</div>
+              <div class="repo-desc">${repo.description || '暂无简介，点进去看看吧。'}</div>
+              <div class="repo-meta">
+                ${lang ? `<span class="repo-lang"><span class="lang-dot" style="background:${dotColor}"></span>${lang}</span>` : ''}
+                <span>⭐ ${repo.stargazers_count}</span>
+                <span>⑂ ${repo.forks_count}</span>
+              </div>`;
+            grid.appendChild(a);
+          });
+        })
+        .catch(err => {
+          grid.innerHTML = '<div class="repo-empty">仓库数据拉取失败，可前往 GitHub 查看完整列表。</div>';
+        });
+    }
+    fetchRepos();
+
     // 1. 白天/暗黑主题切换系统
     const savedTheme = localStorage.getItem('theme') || 'dark';
     applyTheme(savedTheme);

@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章阅读 · StarsOfDeduce</title>
+  <meta name="description" content="StarsOfDeduce 的技术推演日志。桌面美化、毛玻璃拟物交互、Electron 与 C++ 底层调优。">
+  <meta name="author" content="StarsOfDeduce">
+  <link rel="canonical" href="https://starsofdeduce.github.io/post.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="StarsOfDeduce · 演绎之星">
+  <meta property="og:title" content="文章阅读 · StarsOfDeduce">
+  <meta property="og:description" content="StarsOfDeduce 的技术推演日志。">
+  <meta property="og:url" content="https://starsofdeduce.github.io/post.html">
+  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.png">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="文章阅读 · StarsOfDeduce">
+  <meta name="twitter:description" content="StarsOfDeduce 的技术推演日志。">
   <link rel="icon" href="./avatar.png" type="image/png">
   <script src="./js/marked.min.js"></script>
   <style>
@@ -231,6 +244,94 @@
       color: var(--text-dim);
     }
 
+    /* 阅读进度条 */
+    .reading-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+      z-index: 1000;
+      transition: width 0.12s linear;
+    }
+
+    /* 回到顶部 */
+    .back-top {
+      position: fixed;
+      right: 24px;
+      bottom: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px);
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+    .back-top.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .back-top:hover { border-color: var(--accent-cyan); transform: translateY(-2px); }
+
+    /* 代码复制按钮 */
+    .code-wrap { position: relative; }
+    .code-copy {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0;
+    }
+    .code-wrap:hover .code-copy { opacity: 1; }
+    .code-copy:hover { color: var(--text-main); border-color: var(--accent-cyan); }
+    .code-copy.copied { color: var(--accent-emerald); border-color: var(--accent-emerald); }
+
+    /* 文章目录 */
+    .toc-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+    [data-theme="light"] .toc-box { background: rgba(15, 23, 42, 0.03); }
+    .toc-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      font-family: var(--font-mono);
+    }
+    .toc-list { list-style: none; padding-left: 0; }
+    .toc-list li { margin-bottom: 6px; font-size: 0.9rem; }
+    .toc-list a { color: var(--text-muted); text-decoration: none; }
+    .toc-list a:hover { color: var(--accent-cyan); }
+    .toc-list li.toc-h2 a { font-weight: 600; color: var(--text-main); }
+    .toc-list li.toc-h3 { padding-left: 16px; font-size: 0.85rem; }
+
     @media (max-width: 640px) {
       .article-card { padding: 22px 18px; }
       .markdown-body h1 { font-size: 1.55rem; }
@@ -238,9 +339,12 @@
   </style>
 </head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
   <canvas id="space-canvas"></canvas>
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
+
+  <button class="back-top" id="back-top" title="回到顶部" aria-label="回到顶部">↑</button>
 
   <div class="article-container">
     <nav class="nav-bar">
@@ -313,10 +417,18 @@
         return res.text();
       })
       .then(markdown => {
-        document.getElementById('content').innerHTML = marked.parse(markdown);
-        // 动态更新页面标题为文章一级标题
+        const content = document.getElementById('content');
+        content.innerHTML = marked.parse(markdown);
+        // 动态更新页面标题与社交分享标题为文章一级标题
         const h1 = document.querySelector('.markdown-body h1');
-        if (h1) document.title = `${h1.innerText} · StarsOfDeduce`;
+        if (h1) {
+          const title = `${h1.innerText} · StarsOfDeduce`;
+          document.title = title;
+          const ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) ogTitle.setAttribute('content', title);
+        }
+        buildToc(content);
+        enhanceCodeBlocks();
       })
       .catch(err => {
         document.getElementById('content').innerHTML = `
@@ -325,6 +437,76 @@
           <a href="./index.html" class="btn-glass" style="margin-top: 14px;">返回主页</a>
         `;
       });
+
+    // 为标题生成锚点并构建文章目录
+    function buildToc(content) {
+      const heads = content.querySelectorAll('h2, h3');
+      if (!heads.length) return;
+      let toc = '<div class="toc-box"><div class="toc-title">📑 本文目录</div><ul class="toc-list">';
+      heads.forEach((h, i) => {
+        h.id = 'sec-' + i;
+        toc += `<li class="toc-${h.tagName.toLowerCase()}"><a href="#sec-${i}">${h.textContent}</a></li>`;
+      });
+      toc += '</ul></div>';
+      content.insertAdjacentHTML('afterbegin', toc);
+    }
+
+    // 给代码块加包装与复制按钮
+    function enhanceCodeBlocks() {
+      document.querySelectorAll('.markdown-body pre').forEach(pre => {
+        if (pre.classList.contains('code-wrap')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'code-wrap';
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+        const btn = document.createElement('button');
+        btn.className = 'code-copy';
+        btn.textContent = '复制';
+        btn.setAttribute('aria-label', '复制代码到剪贴板');
+        wrap.appendChild(btn);
+        btn.addEventListener('click', () => {
+          const text = pre.innerText;
+          const done = () => {
+            btn.textContent = '✓ 已复制';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1600);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+          } else {
+            fallbackCopy(text, done);
+          }
+        });
+      });
+    }
+
+    function fallbackCopy(text, done) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    // 阅读进度条与回到顶部
+    const readingBar = document.getElementById('reading-progress');
+    const backTopBtn = document.getElementById('back-top');
+
+    function updateReading() {
+      const doc = document.documentElement;
+      const scrollTop = doc.scrollTop || document.body.scrollTop;
+      const total = doc.scrollHeight - doc.clientHeight;
+      readingBar.style.width = total > 0 ? `${(scrollTop / total) * 100}%` : '0%';
+      backTopBtn.classList.toggle('show', scrollTop > 400);
+    }
+    window.addEventListener('scroll', updateReading, { passive: true });
+    updateReading();
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    backTopBtn.addEventListener('click', scrollToTop);
 
     // 背景星空粒子
     const canvas = document.getElementById('space-canvas');
