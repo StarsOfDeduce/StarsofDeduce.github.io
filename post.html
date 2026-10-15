@@ -155,6 +155,15 @@
       color: var(--text-muted);
       font-size: 1.02rem;
     }
+    .markdown-body .article-meta-line {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin: -6px 0 22px;
+    }
+    .markdown-body .article-meta-line .article-tag {
+      color: var(--accent-purple);
+    }
     .markdown-body blockquote {
       border-left: 4px solid var(--accent-cyan);
       padding: 10px 18px;
@@ -418,15 +427,16 @@
       })
       .then(markdown => {
         const content = document.getElementById('content');
-        content.innerHTML = marked.parse(markdown);
-        // 动态更新页面标题与社交分享标题为文章一级标题
-        const h1 = document.querySelector('.markdown-body h1');
-        if (h1) {
-          const title = `${h1.innerText} · StarsOfDeduce`;
-          document.title = title;
-          const ogTitle = document.querySelector('meta[property="og:title"]');
-          if (ogTitle) ogTitle.setAttribute('content', title);
-        }
+        const { meta, body } = parseFrontmatter(markdown);
+        content.innerHTML = marked.parse(body);
+        // 动态更新页面标题与社交分享标题：优先取 frontmatter 的 title
+        const h1 = content.querySelector('h1');
+        const rawTitle = (meta.title && meta.title.trim()) || (h1 && h1.innerText) || '文章';
+        const title = `${rawTitle} · StarsOfDeduce`;
+        document.title = title;
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', title);
+        renderArticleMeta(content, meta);
         buildToc(content);
         enhanceCodeBlocks();
       })
@@ -437,6 +447,42 @@
           <a href="./index.html" class="btn-glass" style="margin-top: 14px;">返回主页</a>
         `;
       });
+
+    // 解析 YAML frontmatter：posts/*.md 现在带 --- 开头的元信息
+    function parseFrontmatter(md) {
+      const m = md.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      if (!m) return { meta: {}, body: md };
+      const meta = {};
+      m[1].split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx <= 0) return;
+        const key = line.slice(0, idx).trim();
+        let val = line.slice(idx + 1).trim();
+        if (/^["'].*["']$/.test(val)) val = val.slice(1, -1);
+        if (key === 'tags') {
+          meta.tags = val.replace(/^\[|\]$/g, '').split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+        } else {
+          meta[key] = val;
+        }
+      });
+      return { meta, body: m[2] };
+    }
+
+    // 从 frontmatter 渲染文章头部元信息（日期/标签）
+    function renderArticleMeta(content, meta) {
+      const date = Array.isArray(meta.date) ? meta.date[0] : meta.date;
+      const tags = meta.tags || [];
+      if (!date && !tags.length) return;
+      const h1 = content.querySelector('h1');
+      if (!h1) return;
+      const metaLine = document.createElement('p');
+      metaLine.className = 'article-meta-line';
+      metaLine.innerHTML = [
+        date ? `📅 ${date}` : '',
+        tags.map(t => `<span class="article-tag">#${t}</span>`).join(' ')
+      ].filter(Boolean).join('　·　');
+      h1.insertAdjacentElement('afterend', metaLine);
+    }
 
     // 为标题生成锚点并构建文章目录
     function buildToc(content) {

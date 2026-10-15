@@ -1,6 +1,11 @@
-# 深入 WindHawk：用 C++ 重塑 Windows 11 交互体验
+---
+title: "深入 WindHawk：用 C++ 重塑 Windows 11 交互体验"
+description: "解析 Windows 运行时动态注入与窗口消息循环拦截机制，用代码解决系统原生交互痛点。"
+date: 2026-10-05
+tags: [C++, WindHawk, Windows 11, 系统底层]
+---
 
-> 发布于 2026-10-05 · 标签：`C++` `WindHawk` `Windows 11` `系统底层` · 阅读时间：约 4 分钟
+# 深入 WindHawk：用 C++ 重塑 Windows 11 交互体验
 
 ---
 

@@ -1323,7 +1323,7 @@
             </span>
           </div>
 
-          <div class="blog-grid">
+          <div class="blog-grid" id="blog-grid">
             <a href="post.html?id=tar-v-design" class="blog-card">
               <div class="blog-card-meta">
                 <span class="blog-card-tag">架构实战</span>
@@ -1530,6 +1530,64 @@
         });
     }
     fetchRepos();
+
+    // 0b. 解析 YAML frontmatter（posts/*.md）
+    function parseFrontmatter(md) {
+      const m = md.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      if (!m) return { meta: {}, body: md };
+      const meta = {};
+      m[1].split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx <= 0) return;
+        const key = line.slice(0, idx).trim();
+        let val = line.slice(idx + 1).trim();
+        if (/^["'].*["']$/.test(val)) val = val.slice(1, -1);
+        if (key === 'tags') {
+          meta.tags = val.replace(/^\[|\]$/g, '').split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+        } else {
+          meta[key] = val;
+        }
+      });
+      return { meta, body: m[2] };
+    }
+
+    // 0c. 动态加载博客文章列表：新文章发布后首页自动出现
+    async function loadBlogPosts() {
+      const grid = document.getElementById('blog-grid');
+      try {
+        const res = await fetch('https://api.github.com/repos/StarsOfDeduce/StarsofDeduce.github.io/contents/posts');
+        if (!res.ok) throw new Error(String(res.status));
+        const files = await res.json();
+        if (!Array.isArray(files)) throw new Error('bad response');
+        const cards = [];
+        for (const f of files) {
+          if (!f.name.endsWith('.md')) continue;
+          const raw = await fetch(f.download_url).then(r => r.text()).catch(() => null);
+          if (!raw) continue;
+          const { meta } = parseFrontmatter(raw);
+          cards.push({
+            id: f.name.replace(/\.md$/, ''),
+            title: (meta.title && meta.title.trim()) || f.name.replace(/\.md$/, ''),
+            desc: meta.description || '',
+            date: (Array.isArray(meta.date) ? meta.date[0] : meta.date) || '',
+            tags: meta.tags || []
+          });
+        }
+        if (!cards.length) return;
+        cards.sort((a, b) => new Date(b.date) - new Date(a.date));
+        grid.innerHTML = cards.slice(0, 6).map(c => `
+          <a href="post.html?id=${c.id}" class="blog-card">
+            <div class="blog-card-meta">
+              <span class="blog-card-tag">${c.tags[0] || '笔记'}</span>
+              <span>${c.date}</span>
+            </div>
+            <h3 class="blog-card-title">${c.title}</h3>
+            <p class="blog-card-desc">${c.desc || '点击阅读全文。'}</p>
+            <div class="blog-card-footer">阅读全文 →</div>
+          </a>`).join('');
+      } catch (e) { /* 拉取失败时保留静态兜底卡片 */ }
+    }
+    loadBlogPosts();
 
     // 1. 白天/暗黑主题切换系统
     const savedTheme = localStorage.getItem('theme') || 'dark';
