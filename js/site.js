@@ -40,6 +40,13 @@
     });
   }
   document.addEventListener('click', event => { const trigger = event.target.closest('[data-view], [data-jump]'); if (!trigger) return; const target = trigger.dataset.view || trigger.dataset.jump; if (!target) return; event.preventDefault(); setView(target); });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('.dispatch-card, .forum-row');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    document.body.classList.add('is-leaving');
+    window.setTimeout(() => { location.href = link.href; }, 285);
+  });
   document.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-jump][tabindex]')) { event.preventDefault(); setView(event.target.dataset.jump); } });
   document.getElementById('next-panel')?.addEventListener('click', () => { const current = views.indexOf(location.hash.slice(1)); setView(views[(current + 1 + views.length) % views.length]); });
   heroDots.forEach(dot => dot.addEventListener('click', () => setHero(Number(dot.dataset.heroTo))));
@@ -59,14 +66,22 @@
   window.addEventListener('hashchange', () => setView(location.hash.slice(1), false)); setView(location.hash.slice(1), false);
   async function loadPosts() {
     try {
+      const cached = JSON.parse(sessionStorage.getItem('sod-post-index') || 'null');
+      if (cached?.savedAt > Date.now() - 15 * 60 * 1000 && Array.isArray(cached.posts)) return cached.posts;
+    } catch { /* Storage can be unavailable in privacy modes. */ }
+    try {
       const response = await fetch('https://api.github.com/repos/StarsofDeduce/StarsofDeduce.github.io/contents/posts', { headers: { Accept: 'application/vnd.github+json' } }); if (!response.ok) throw new Error(`GitHub API ${response.status}`);
       const files = (await response.json()).filter(file => file.name.endsWith('.md'));
       const records = await Promise.all(files.map(async file => { const raw = await fetch(file.download_url).then(result => result.ok ? result.text() : Promise.reject(new Error('download failed'))); const { meta } = parseFrontmatter(raw); return { id: file.name.replace(/\.md$/i, ''), title: meta.title || file.name, description: meta.description || '暂无摘要', date: meta.date || '', tags: Array.isArray(meta.tags) ? meta.tags : [] }; }));
-      return records.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const posts = records.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      try { sessionStorage.setItem('sod-post-index', JSON.stringify({ savedAt: Date.now(), posts })); } catch { /* Optional cache. */ }
+      return posts;
     } catch (error) { console.warn('Using local post index fallback:', error); return fallbackPosts; }
   }
   function renderHome(posts) { const target = document.getElementById('home-dispatches'); if (!target) return; target.innerHTML = posts.slice(0, 3).map((post, index) => `<a class="dispatch-card" href="./post.html?id=${encodeURIComponent(post.id)}"><span>0${index + 1} / ${escapeHTML(post.tags[0] || 'NOTE')}</span><strong>${escapeHTML(post.title)}</strong><small>${escapeHTML(post.date || 'UNFILED')}</small></a>`).join(''); }
   function renderForum(posts) { const target = document.getElementById('forum-list'); const count = document.getElementById('archive-count'); if (!target) return; if (count) count.textContent = `${String(posts.length).padStart(2, '0')} 份记录`; target.innerHTML = posts.map((post, index) => `<a class="forum-row" href="./post.html?id=${encodeURIComponent(post.id)}"><span class="forum-index">${String(index + 1).padStart(2, '0')}</span><div class="forum-title"><strong>${escapeHTML(post.title)}</strong><small>${escapeHTML(post.tags.join(' / ') || '未分类')}</small></div><time>${escapeHTML(post.date || '—')}</time><span class="forum-status">${index === 0 ? 'NEW TRANSMISSION' : 'ARCHIVED'}</span></a>`).join(''); }
+  renderHome(fallbackPosts);
+  renderForum(fallbackPosts);
   loadPosts().then(posts => { renderHome(posts); renderForum(posts); });
   const systemIndex = document.getElementById('system-index');
   const signalCharacters = '0123456789ABCDEF?#';
@@ -88,4 +103,5 @@
   nextSystemIndex();
   window.setInterval(nextSystemIndex, 2400);
   const clock = document.getElementById('clock'); function updateClock() { if (clock) clock.textContent = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()); } updateClock(); setInterval(updateClock, 1000);
+  window.addEventListener('pageshow', () => document.body.classList.remove('is-leaving'));
 })();

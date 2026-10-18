@@ -8,10 +8,12 @@
   <meta name="theme-color" content="#e9f1f8">
   <meta property="og:title" content="StarsofDeduce · Personal Operations Directory">
   <meta property="og:description" content="在代码、系统与界面之间，建立自己的秩序。">
-  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.png?v=20261018-4">
+  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.webp?v=20261018-6">
   <title>StarsofDeduce · Personal Operations Directory</title>
-  <link rel="icon" href="./avatar.png?v=20261018-4">
-  <link rel="stylesheet" href="./styles/site.css?v=20261018-5">
+  <link rel="icon" type="image/webp" href="./avatar.webp?v=20261018-6">
+  <link rel="preload" as="image" href="./assets/visuals/hero-analyst.webp" type="image/webp" fetchpriority="high">
+  <link rel="preconnect" href="https://api.github.com">
+  <link rel="stylesheet" href="./styles/site.css?v=20261018-7">
 </head>
 <body>
   <div class="page-shell">
@@ -49,7 +51,7 @@
               </div>
             </div>
             <div class="hero-identity" aria-hidden="true"><span>OPERATOR</span><strong>StarsofDeduce</strong><small>INTERFACE / SYSTEM / WINDOWS</small></div>
-            <img class="hero-character hero-analyst" src="./assets/visuals/hero-analyst.png" alt="原创未来系统分析师角色主视觉">
+            <img class="hero-character hero-analyst" src="./assets/visuals/hero-analyst.webp" alt="原创未来系统分析师角色主视觉" fetchpriority="high" decoding="async">
           </article>
           <article class="hero-slide" data-hero-slide="1" aria-hidden="true">
             <div class="hero-angle hero-angle-shift" aria-hidden="true"></div>
@@ -63,7 +65,7 @@
               </div>
             </div>
             <div class="hero-identity" aria-hidden="true"><span>SYSTEMS ENGINEER</span><strong>ORION / NODE 02</strong><small>NATIVE / AUTOMATION / CONTROL</small></div>
-            <img class="hero-character hero-engineer" src="./assets/visuals/hero-engineer.png" alt="原创系统工程师角色主视觉">
+            <img class="hero-character hero-engineer" src="./assets/visuals/hero-engineer.webp" alt="原创系统工程师角色主视觉" loading="lazy" decoding="async">
           </article>
           <article class="hero-slide" data-hero-slide="2" aria-hidden="true">
             <div class="hero-angle hero-angle-deep" aria-hidden="true"></div>
@@ -77,7 +79,7 @@
               </div>
             </div>
             <div class="hero-identity" aria-hidden="true"><span>INTERACTION ARCHITECT</span><strong>LYRA / NODE 03</strong><small>STRUCTURE / MOTION / CLARITY</small></div>
-            <img class="hero-character hero-architect" src="./assets/visuals/hero-architect.png" alt="原创交互架构师角色主视觉">
+            <img class="hero-character hero-architect" src="./assets/visuals/hero-architect.webp" alt="原创交互架构师角色主视觉" loading="lazy" decoding="async">
           </article>
         </div>
         <div class="hero-sequence" aria-label="角色介绍，共三页">
@@ -95,7 +97,7 @@
           </article>
           <article class="feature-card feature-image" data-jump="intel" tabindex="0">
             <div><p>KNOWLEDGE ARCHIVE</p><h2>工作札记</h2><span>ENGINEERING / DESIGN / NOTES</span></div>
-            <img src="./avatar.png?v=20261018-4" alt="StarsofDeduce 头像">
+            <img src="./avatar.webp?v=20261018-6" alt="StarsofDeduce 头像" loading="lazy" decoding="async">
             <strong>记录方案，而非制造噪音</strong>
           </article>
           <div class="dispatch-column">
@@ -165,7 +167,7 @@
         <div class="identity-shell">
           <article class="personnel-card primary-personnel">
             <div class="personnel-top"><span>AUTHORIZED PERSONNEL</span><span>ID / 175666831</span></div>
-            <img src="./avatar.png?v=20261018-4" alt="StarsofDeduce 头像">
+            <img src="./avatar.webp?v=20261018-6" alt="StarsofDeduce 头像" loading="lazy" decoding="async">
             <div class="personnel-copy"><p>OWNER / DEVELOPER</p><h3>StarsofDeduce</h3><strong>Windows tools · interaction systems · independent software</strong><dl><div><dt>基地</dt><dd>GitHub</dd></div><div><dt>关注</dt><dd>效率与体验</dd></div><div><dt>状态</dt><dd>持续构建</dd></div></dl></div>
             <a href="https://github.com/StarsofDeduce" target="_blank" rel="noreferrer">访问公开档案 ↗</a>
           </article>
@@ -181,10 +183,12 @@
 
     <footer class="command-bar">
       <div class="command-left"><span class="status-pulse"></span> ARCHIVE ONLINE</div>
-      <div class="command-center" id="clock">--:--:--</div>
+      <div class="command-center"><span id="clock">--:--:--</span><div class="audio-module"><button class="audio-toggle" id="audio-toggle" type="button" aria-label="播放或暂停背景音乐"><i aria-hidden="true"></i><span id="audio-label">MUSIC / READY</span></button><input id="audio-volume" type="range" min="0" max="100" value="24" aria-label="背景音乐音量"><output id="audio-level">24</output></div></div>
       <div class="command-actions"><a href="./admin/" aria-label="内容管理">CMS CONSOLE</a><a href="https://github.com/StarsofDeduce" target="_blank" rel="noreferrer" aria-label="GitHub">GITHUB NODE</a><button id="next-panel" aria-label="切换到下一页">NEXT DOSSIER →</button></div>
     </footer>
   </div>
-  <script src="./js/site.js?v=20261018-4"></script>
+  <audio id="site-audio" src="./assets/audio/hackclaw-surfing-theme.mp3" preload="metadata" loop></audio>
+  <script src="./js/audio.js?v=20261018-9"></script>
+  <script src="./js/site.js?v=20261018-6"></script>
 </body>
 </html>

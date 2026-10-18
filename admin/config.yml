@@ -8,7 +8,7 @@ backend:
 
 site_url: https://starsofdeduce.github.io
 display_url: https://starsofdeduce.github.io
-logo_url: https://starsofdeduce.github.io/avatar.png?v=20261018-4
+logo_url: https://starsofdeduce.github.io/avatar.webp?v=20261018-6
 
 # 文章配图 / 上传文件的存放位置
 media_folder: "assets/uploads"
