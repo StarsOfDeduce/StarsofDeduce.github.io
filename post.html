@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="StarsofDeduce"><meta name="description" content="StarsofDeduce 的文章档案"><meta name="theme-color" content="#e9f1f8">
-  <title>读取档案 · StarsofDeduce</title><link rel="icon" type="image/webp" href="./avatar.webp?v=20261018-6"><link rel="stylesheet" href="./styles/site.css?v=20261018-7"><script src="./js/marked.min.js"></script>
+  <title>读取档案 · StarsofDeduce</title><link rel="icon" type="image/x-icon" href="./favicon.ico?v=20261018-1"><link rel="stylesheet" href="./styles/site.css?v=20261018-10"><script src="./js/marked.min.js"></script>
 </head>
 <body class="article-page">
   <div class="reading-progress" id="reading-progress"></div>
@@ -10,7 +10,7 @@
     <header class="topbar">
       <a class="brand" href="./#overview" aria-label="返回总览"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span class="brand-word">S/DEDUCE</span></a>
       <nav class="primary-nav" aria-label="主要导航"><a class="nav-link" href="./#overview">关于本站</a><a class="nav-link is-active" href="./#intel">文章档案</a><a class="nav-link" href="./#systems">解决方案</a><a class="nav-link" href="./#identity">个人档案</a></nav>
-      <div class="signal-meter"><span class="signal-glyph"></span><span>读取权限</span><strong>OPEN</strong></div>
+      <div class="signal-meter"><canvas class="signal-polyhedron" width="96" height="96" aria-hidden="true"></canvas><span>读取权限</span><strong>OPEN</strong></div>
     </header>
     <main class="article-stage">
       <aside class="article-rail">
@@ -19,16 +19,18 @@
         <nav class="toc-box" aria-label="文章目录"><strong>SECTION INDEX</strong><ol id="toc-list"><li>正在建立目录</li></ol></nav>
       </aside>
       <article class="article-document">
-        <header class="article-header"><div class="document-author"><img src="./avatar.webp?v=20261018-6" alt="StarsofDeduce" decoding="async"><div><strong>StarsofDeduce</strong><span>OWNER / DEVELOPER</span></div></div><span class="document-permit">PUBLIC ACCESS / ARCHIVE NODE</span></header>
+        <header class="article-header"><div class="document-author"><img src="./avatar-cutout.png?v=20261018-12" alt="StarsofDeduce" decoding="async"><div><strong>StarsofDeduce</strong><span>OWNER / DEVELOPER</span></div></div><span class="document-permit">PUBLIC ACCESS / ARCHIVE NODE</span></header>
         <div class="markdown-body" id="article-content"><p class="article-loading">正在解密档案内容……</p></div>
         <footer class="article-foot"><span>STARSOFDEDUCE / PERSONAL ARCHIVE</span><a href="./#intel">读取下一份档案 →</a></footer>
       </article>
       <aside class="related-panel"><div class="section-heading-row"><div><p class="micro-label">RELATED RECORDS</p><h3>相关档案</h3></div></div><div id="related-posts" class="related-list"><p>正在同步索引……</p></div></aside>
     </main>
-    <footer class="command-bar"><div class="command-left"><span class="status-pulse"></span> DOCUMENT CHANNEL</div><div class="command-center"><span id="reading-state">SCROLL / 000%</span><div class="audio-module"><button class="audio-toggle" id="audio-toggle" type="button" aria-label="播放或暂停背景音乐"><i aria-hidden="true"></i><span id="audio-label">MUSIC / READY</span></button><input id="audio-volume" type="range" min="0" max="100" value="24" aria-label="背景音乐音量"><output id="audio-level">24</output></div></div><div class="command-actions"><button id="back-top">RETURN TO TOP ↑</button></div></footer>
+    <footer class="command-bar"><div class="command-left"><span class="status-pulse"></span> DOCUMENT CHANNEL</div><div class="command-center"><span id="reading-state">SCROLL / 000%</span><div class="audio-module"><button class="audio-toggle" id="audio-toggle" type="button" aria-label="播放或暂停背景音乐"><i aria-hidden="true"></i><span id="audio-label">MUSIC</span></button><input id="audio-volume" type="range" min="0" max="100" value="24" aria-label="背景音乐音量"><output id="audio-level">24</output></div></div><div class="command-actions"><button id="back-top">RETURN TO TOP ↑</button></div></footer>
   </div>
   <audio id="site-audio" src="./assets/audio/hackclaw-surfing-theme.mp3" preload="metadata" loop></audio>
-  <script src="./js/audio.js?v=20261018-9"></script>
-  <script src="./js/post.js?v=20261018-6"></script>
+  <script src="./js/link-policy.js?v=20261018-3"></script>
+  <script src="./js/signal.js?v=20261018-3"></script>
+  <script src="./js/audio.js?v=20261018-11"></script>
+  <script src="./js/post.js?v=20261018-8"></script>
 </body>
 </html>
