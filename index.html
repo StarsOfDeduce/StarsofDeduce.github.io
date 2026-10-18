@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="StarsOfDeduce 的个人系统档案：Windows、交互设计与独立开发。">
-  <meta name="author" content="StarsOfDeduce">
+  <meta name="description" content="StarsofDeduce 的个人系统档案：Windows、交互设计与独立开发。">
+  <meta name="author" content="StarsofDeduce">
   <meta name="theme-color" content="#e9f1f8">
-  <meta property="og:title" content="StarsOfDeduce · Personal Operations Directory">
+  <meta property="og:title" content="StarsofDeduce · Personal Operations Directory">
   <meta property="og:description" content="在代码、系统与界面之间，建立自己的秩序。">
-  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.png">
-  <title>StarsOfDeduce · Personal Operations Directory</title>
-  <link rel="icon" href="./avatar.png">
-  <link rel="stylesheet" href="./styles/site.css">
+  <meta property="og:image" content="https://starsofdeduce.github.io/avatar.png?v=20261018-4">
+  <title>StarsofDeduce · Personal Operations Directory</title>
+  <link rel="icon" href="./avatar.png?v=20261018-4">
+  <link rel="stylesheet" href="./styles/site.css?v=20261018-5">
 </head>
 <body>
   <div class="page-shell">
@@ -36,19 +36,56 @@
     <main class="stage">
       <section class="view-panel overview-panel is-active" data-panel="overview" aria-labelledby="overview-title">
         <div class="hero-grid" aria-hidden="true"></div>
-        <div class="hero-angle" aria-hidden="true"></div>
-        <div class="hero-copy">
-          <p class="micro-label">PERSONAL OPERATIONS DIRECTORY / 01</p>
-          <h1 id="overview-title">界面属于<br><span>思考的人</span></h1>
-          <p class="hero-lead">在代码、系统与界面之间，建立自己的秩序。</p>
-          <div class="hero-sequence" aria-label="第一个展示页"><i class="is-active"></i><i></i><i></i></div>
-          <div class="hero-actions">
-            <button class="action-button action-primary" data-jump="intel">读取文章档案</button>
-            <a class="action-button" href="https://github.com/StarsOfDeduce" target="_blank" rel="noreferrer">GitHub 档案 ↗</a>
-          </div>
+        <div class="hero-slides" aria-live="polite">
+          <article class="hero-slide is-active" data-hero-slide="0" aria-hidden="false">
+            <div class="hero-angle" aria-hidden="true"></div>
+            <div class="hero-copy">
+              <p class="micro-label">PERSONAL OPERATIONS DIRECTORY / 01</p>
+              <h1 id="overview-title">界面属于<br><span>思考的人</span></h1>
+              <p class="hero-lead">在代码、系统与界面之间，建立自己的秩序。</p>
+              <div class="hero-actions">
+                <button class="action-button action-primary" data-jump="intel">读取文章档案</button>
+                <a class="action-button" href="https://github.com/StarsofDeduce" target="_blank" rel="noreferrer">GitHub 档案 ↗</a>
+              </div>
+            </div>
+            <div class="hero-identity" aria-hidden="true"><span>OPERATOR</span><strong>StarsofDeduce</strong><small>INTERFACE / SYSTEM / WINDOWS</small></div>
+            <img class="hero-character hero-analyst" src="./assets/visuals/hero-analyst.png" alt="原创未来系统分析师角色主视觉">
+          </article>
+          <article class="hero-slide" data-hero-slide="1" aria-hidden="true">
+            <div class="hero-angle hero-angle-shift" aria-hidden="true"></div>
+            <div class="hero-copy">
+              <p class="micro-label">SYSTEMS ENGINEERING PROFILE / 02</p>
+              <h1>系统应当<br><span>服从直觉</span></h1>
+              <p class="hero-lead">让工具贴近动作，让复杂性退到界面之后。</p>
+              <div class="hero-actions">
+                <button class="action-button action-primary" data-jump="systems">检查解决方案</button>
+                <button class="action-button" data-jump="identity">读取个人档案</button>
+              </div>
+            </div>
+            <div class="hero-identity" aria-hidden="true"><span>SYSTEMS ENGINEER</span><strong>ORION / NODE 02</strong><small>NATIVE / AUTOMATION / CONTROL</small></div>
+            <img class="hero-character hero-engineer" src="./assets/visuals/hero-engineer.png" alt="原创系统工程师角色主视觉">
+          </article>
+          <article class="hero-slide" data-hero-slide="2" aria-hidden="true">
+            <div class="hero-angle hero-angle-deep" aria-hidden="true"></div>
+            <div class="hero-copy">
+              <p class="micro-label">INTERACTION ARCHITECTURE / 03</p>
+              <h1>把复杂<br><span>留给底层</span></h1>
+              <p class="hero-lead">让每一次点击都有明确的目的与回应。</p>
+              <div class="hero-actions">
+                <button class="action-button action-primary" data-jump="intel">浏览工作札记</button>
+                <button class="action-button" data-jump="systems">查看构建节点</button>
+              </div>
+            </div>
+            <div class="hero-identity" aria-hidden="true"><span>INTERACTION ARCHITECT</span><strong>LYRA / NODE 03</strong><small>STRUCTURE / MOTION / CLARITY</small></div>
+            <img class="hero-character hero-architect" src="./assets/visuals/hero-architect.png" alt="原创交互架构师角色主视觉">
+          </article>
         </div>
-        <div class="hero-identity" aria-hidden="true"><span>OPERATOR</span><strong>STARS OF DEDUCE</strong><small>INTERFACE / SYSTEM / WINDOWS</small></div>
-        <img class="hero-character" src="./assets/visuals/hero-analyst.png" alt="原创未来系统工程师角色主视觉">
+        <div class="hero-sequence" aria-label="角色介绍，共三页">
+          <button class="is-active" type="button" data-hero-to="0" aria-label="显示第一位角色" aria-current="true"></button>
+          <button type="button" data-hero-to="1" aria-label="显示第二位角色" aria-current="false"></button>
+          <button type="button" data-hero-to="2" aria-label="显示第三位角色" aria-current="false"></button>
+          <span>SCROLL / 01—03</span>
+        </div>
 
         <div class="dossier-band">
           <article class="feature-card feature-blue" data-jump="systems" tabindex="0">
@@ -58,7 +95,7 @@
           </article>
           <article class="feature-card feature-image" data-jump="intel" tabindex="0">
             <div><p>KNOWLEDGE ARCHIVE</p><h2>工作札记</h2><span>ENGINEERING / DESIGN / NOTES</span></div>
-            <img src="./avatar.png" alt="StarsOfDeduce 头像">
+            <img src="./avatar.png?v=20261018-4" alt="StarsofDeduce 头像">
             <strong>记录方案，而非制造噪音</strong>
           </article>
           <div class="dispatch-column">
@@ -108,11 +145,11 @@
           <article class="solution-hero">
             <img src="./tar-v-logo.png" alt="Tar V">
             <div><p>PRIMARY DEPLOYMENT / WINDOWS</p><h3>Tar V 快捷启动面板</h3><strong>让入口服从工作流，而不是让人迁就菜单。</strong></div>
-            <a href="https://github.com/StarsOfDeduce/Tar-V" target="_blank" rel="noreferrer">打开仓库 ↗</a>
+            <a href="https://github.com/StarsofDeduce/Tar-V" target="_blank" rel="noreferrer">打开仓库 ↗</a>
           </article>
           <div class="solution-list">
-            <article><span class="solution-code">SYS-01</span><div><h4>Tar V</h4><p>Electron 与 Windows API 驱动的轻量快捷启动面板。</p></div><div class="solution-stack">ELECTRON<br>WIN32</div><a href="https://github.com/StarsOfDeduce/Tar-V" target="_blank" rel="noreferrer">查看系统</a></article>
-            <article><span class="solution-code">SYS-02</span><div><h4>WindHawk Modules</h4><p>用 C++ 对 Windows 交互细节进行针对性修正。</p></div><div class="solution-stack">C++<br>SYSTEM HOOK</div><a href="https://github.com/StarsOfDeduce/WindHawk" target="_blank" rel="noreferrer">查看系统</a></article>
+            <article><span class="solution-code">SYS-01</span><div><h4>Tar V</h4><p>Electron 与 Windows API 驱动的轻量快捷启动面板。</p></div><div class="solution-stack">ELECTRON<br>WIN32</div><a href="https://github.com/StarsofDeduce/Tar-V" target="_blank" rel="noreferrer">查看系统</a></article>
+            <article><span class="solution-code">SYS-02</span><div><h4>WindHawk Modules</h4><p>用 C++ 对 Windows 交互细节进行针对性修正。</p></div><div class="solution-stack">C++<br>SYSTEM HOOK</div><a href="https://github.com/StarsofDeduce/WindHawk" target="_blank" rel="noreferrer">查看系统</a></article>
             <article><span class="solution-code">SYS-03</span><div><h4>Publishing Node</h4><p>GitHub Pages、Sveltia CMS 与 Cloudflare OAuth 的无服务器内容链路。</p></div><div class="solution-stack">STATIC<br>EDGE AUTH</div><button data-jump="intel">读取文档</button></article>
           </div>
         </div>
@@ -128,9 +165,9 @@
         <div class="identity-shell">
           <article class="personnel-card primary-personnel">
             <div class="personnel-top"><span>AUTHORIZED PERSONNEL</span><span>ID / 175666831</span></div>
-            <img src="./avatar.png" alt="StarsOfDeduce 头像">
-            <div class="personnel-copy"><p>OWNER / DEVELOPER</p><h3>StarsOfDeduce</h3><strong>Windows tools · interaction systems · independent software</strong><dl><div><dt>基地</dt><dd>GitHub</dd></div><div><dt>关注</dt><dd>效率与体验</dd></div><div><dt>状态</dt><dd>持续构建</dd></div></dl></div>
-            <a href="https://github.com/StarsOfDeduce" target="_blank" rel="noreferrer">访问公开档案 ↗</a>
+            <img src="./avatar.png?v=20261018-4" alt="StarsofDeduce 头像">
+            <div class="personnel-copy"><p>OWNER / DEVELOPER</p><h3>StarsofDeduce</h3><strong>Windows tools · interaction systems · independent software</strong><dl><div><dt>基地</dt><dd>GitHub</dd></div><div><dt>关注</dt><dd>效率与体验</dd></div><div><dt>状态</dt><dd>持续构建</dd></div></dl></div>
+            <a href="https://github.com/StarsofDeduce" target="_blank" rel="noreferrer">访问公开档案 ↗</a>
           </article>
           <article class="personnel-card system-personnel">
             <div class="personnel-top"><span>PUBLISHING CHAIN</span><span>ONLINE</span></div>
@@ -145,9 +182,9 @@
     <footer class="command-bar">
       <div class="command-left"><span class="status-pulse"></span> ARCHIVE ONLINE</div>
       <div class="command-center" id="clock">--:--:--</div>
-      <div class="command-actions"><a href="./admin/" aria-label="内容管理">CMS</a><a href="https://github.com/StarsOfDeduce" target="_blank" rel="noreferrer" aria-label="GitHub">GH</a><button id="next-panel" aria-label="切换到下一页">NEXT →</button></div>
+      <div class="command-actions"><a href="./admin/" aria-label="内容管理">CMS CONSOLE</a><a href="https://github.com/StarsofDeduce" target="_blank" rel="noreferrer" aria-label="GitHub">GITHUB NODE</a><button id="next-panel" aria-label="切换到下一页">NEXT DOSSIER →</button></div>
     </footer>
   </div>
-  <script src="./js/site.js"></script>
+  <script src="./js/site.js?v=20261018-4"></script>
 </body>
 </html>

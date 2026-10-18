@@ -45,4 +45,4 @@ Windows 本地 `.lnk`、`.url` 以及各类文件具有复杂的图标资源链�
 - [ ] 插件化扩展能力（计算器、即时搜索增强）
 - [ ] 多显示器自适应唤出逻辑
 
-欢迎在 [GitHub - StarsOfDeduce/Tar-V](https://github.com/StarsOfDeduce/Tar-V) 交流反馈与 Star 支持！
+欢迎在 [GitHub - StarsofDeduce/Tar-V](https://github.com/StarsofDeduce/Tar-V) 交流反馈与 Star 支持！

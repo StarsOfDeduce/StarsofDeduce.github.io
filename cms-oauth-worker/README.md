@@ -29,7 +29,7 @@
 
 1. GitHub 右上角头像 → **Settings** → 左侧最下 **Developer settings** → **OAuth Apps** → **New OAuth App**
 2. 填写：
-   - **Application name**：`StarsOfDeduce CMS`
+   - **Application name**：`StarsofDeduce CMS`
    - **Homepage URL**：`https://starsofdeduce.github.io`
    - **Authorization callback URL**：`https://cmsgtio.account-subdomain.workers.dev/callback`
      - ⚠️ 必须和步骤一的地址**完全一致**（结尾 `/callback`，不要带多余斜杠）
@@ -55,7 +55,7 @@
 ```yaml
 backend:
   name: github
-  repo: StarsOfDeduce/StarsofDeduce.github.io
+  repo: StarsofDeduce/StarsofDeduce.github.io
   branch: main
   base_url: https://<你的worker地址>
   auth_endpoint: auth

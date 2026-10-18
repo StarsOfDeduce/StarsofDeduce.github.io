@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: StarsOfDeduce/StarsofDeduce.github.io
+  repo: StarsofDeduce/StarsofDeduce.github.io
   branch: main
   # 指向自托管在 Cloudflare Worker 上的 GitHub OAuth 网关
   base_url: https://cmsgtio.account-subdomain.workers.dev
@@ -8,7 +8,7 @@ backend:
 
 site_url: https://starsofdeduce.github.io
 display_url: https://starsofdeduce.github.io
-logo_url: https://starsofdeduce.github.io/avatar.png
+logo_url: https://starsofdeduce.github.io/avatar.png?v=20261018-4
 
 # 文章配图 / 上传文件的存放位置
 media_folder: "assets/uploads"

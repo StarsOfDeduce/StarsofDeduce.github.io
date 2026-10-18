@@ -42,4 +42,4 @@ LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 - **资源管理器标签页微调**：优化深浅主题自动适配的平滑过渡；
 - **多显示器交互增强**：防止窗口在副屏边界误触发边缘吸附。
 
-欢迎在 [GitHub - StarsOfDeduce/WindHawk](https://github.com/StarsOfDeduce/WindHawk) 探索具体的代码实现！
+欢迎在 [GitHub - StarsofDeduce/WindHawk](https://github.com/StarsofDeduce/WindHawk) 探索具体的代码实现！
