@@ -66,4 +66,50 @@ test('successful callback returns the token only to the exact configured HTTPS o
   assert.match(body, /https:\/\/starsofdeduce\.github\.io/);
   assert.doesNotMatch(body, /postMessage\([^)]*,\s*['"]\*['"]\)/);
   assert.match(body, /test-access-token/);
+  assert.match(body, /setTimeout\(announce, 250\)/);
+});
+
+test('callback accepts GitHub form-encoded token responses', async (t) => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('access_token=form-token&scope=public_repo&token_type=bearer', {
+    status: 200,
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const state = 'matching-state';
+  const response = await worker.fetch(new Request(`${base}/callback?code=test-code&state=${state}`, {
+    headers: { Cookie: `__Host-cms-oauth-state=${state}` },
+  }), env);
+
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /form-token/);
+});
+
+test('callback reports a diagnostic id without exposing a malformed token response', async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalError = console.error;
+  let logEntry;
+  globalThis.fetch = async () => new Response('{}', {
+    status: 502,
+    headers: { 'content-type': 'application/json' },
+  });
+  console.error = (...args) => { logEntry = args; };
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    console.error = originalError;
+  });
+
+  const state = 'matching-state';
+  const response = await worker.fetch(new Request(`${base}/callback?code=test-code&state=${state}`, {
+    headers: { Cookie: `__Host-cms-oauth-state=${state}` },
+  }), env);
+  const body = await response.text();
+
+  assert.equal(response.status, 400);
+  assert.match(body, /GitHub 返回 HTTP 502/);
+  assert.match(body, /诊断编号/);
+  assert.doesNotMatch(body, /未知错误/);
+  assert.equal(logEntry[0], 'GitHub OAuth token exchange failed');
+  assert.equal(logEntry[1].status, 502);
 });

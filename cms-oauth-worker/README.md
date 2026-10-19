@@ -77,7 +77,7 @@ backend:
 - **禁止缓存**：授权页和回调页均返回 `Cache-Control: no-store`，并设置 CSP、禁止嵌入和严格来源策略。
 - **Invalid Redirect URI**：检查 GitHub OAuth App（当前授权页显示 `PageOAuth`）中的 **Authorization callback URL** 是否与 `https://cmsgtio.account-subdomain.workers.dev/callback` 完全一致。若你更改的是另一个 OAuth App，此错误仍会出现。
 - **登录后所有提交都以你的 GitHub 身份直接 commit 到仓库。**
-- 若登录弹窗报错，看 Worker 后台 **Logs** 面板会显示具体原因。
+- 若登录弹窗报错，不要刷新 `/callback?code=...` 页面（GitHub 授权码只能使用一次）；关闭弹窗后从后台重新登录。页面会显示诊断编号，Worker 后台 **Logs** 会记录对应的 HTTP 状态和错误类型，但不会记录令牌或 Client Secret。
 - **不要使用宽权限令牌作为备选方案**：若必须使用个人访问令牌，应选择 fine-grained token，并仅授权博客仓库和必要操作。
 
 ## 用 wrangler CLI（可选）

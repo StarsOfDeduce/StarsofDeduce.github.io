@@ -87,10 +87,16 @@ function authPage(provider, content, allowedOrigins, extraSetCookie) {
       var payload = ${payloadJson};
       if (!window.opener) { return; }
       var posted = false;
-      // Handshake: tell the CMS we are authorising
-      allowed.forEach(function (origin) {
-        try { window.opener.postMessage('authorizing:' + provider, origin); } catch (e) {}
-      });
+      var attempts = 0;
+      // Repeat the announcement briefly so a slow CMS tab cannot miss the handshake.
+      function announce() {
+        if (posted || attempts >= 40) { return; }
+        attempts += 1;
+        allowed.forEach(function (origin) {
+          try { window.opener.postMessage('authorizing:' + provider, origin); } catch (e) {}
+        });
+        setTimeout(announce, 250);
+      }
       window.addEventListener('message', function (e) {
         if (posted) { return; }
         if (e.source !== window.opener || e.data !== 'authorizing:' + provider || !allowed.includes(e.origin)) { return; }
@@ -98,14 +104,40 @@ function authPage(provider, content, allowedOrigins, extraSetCookie) {
         window.opener.postMessage('authorization:' + provider + ':success:' + payload, e.origin);
         setTimeout(function () { window.close(); }, 300);
       });
+      announce();
     })();
   </script>`, extraSetCookie);
 }
 
 function errorPage(message, extraSetCookie) {
-  const body = `<h1 class="err">授权失败</h1><p>${escapeHTML(message)}<br>请刷新页面重试。</p>`;
+  const body = `<h1 class="err">授权失败</h1><p>${escapeHTML(message)}<br>请关闭本窗口，再从博客后台重新登录。</p>`;
   return pageShell('错误', body, extraSetCookie);
 }
+
+/**
+ * GitHub normally honours Accept: application/json, but accepting its documented
+ * form-encoded fallback avoids turning a useful OAuth error into "unknown error".
+ */
+function parseTokenResponse(raw, contentType) {
+  if (!raw) return {};
+
+  if (contentType.includes('application/json') || raw.trimStart().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  return Object.fromEntries(new URLSearchParams(raw));
+}
+
+const safeOAuthError = (token, status) => {
+  const description = typeof token.error_description === 'string' ? token.error_description : '';
+  const code = typeof token.error === 'string' ? token.error : '';
+  return description || code || `GitHub 返回 HTTP ${status}`;
+};
 
 export default {
   async fetch(request, env) {
@@ -166,18 +198,27 @@ export default {
           client_secret: env.OAUTH_CLIENT_SECRET,
           code,
           redirect_uri: `${base}/callback`,
-          grant_type: 'authorization_code',
         }),
       });
 
-      const token = await tokenRes.json();
-      const content = token.access_token
+      const responseType = tokenRes.headers.get('content-type') || '';
+      const token = parseTokenResponse(await tokenRes.text(), responseType);
+      const content = tokenRes.ok && typeof token.access_token === 'string' && token.access_token
         ? { token: token.access_token, provider: 'github' }
         : null;
 
       if (!content) {
+        const requestId = crypto.randomUUID();
+        const responseKeys = Object.keys(token).filter((key) => !['access_token', 'refresh_token'].includes(key));
+        console.error('GitHub OAuth token exchange failed', {
+          requestId,
+          status: tokenRes.status,
+          contentType: responseType.split(';', 1)[0],
+          error: typeof token.error === 'string' ? token.error : null,
+          responseKeys,
+        });
         return errorPage(
-          `GitHub 令牌交换失败：${token.error_description || token.error || '未知错误'}`,
+          `GitHub 令牌交换失败：${safeOAuthError(token, tokenRes.status)}（诊断编号：${requestId}）`,
           clear,
         );
       }
