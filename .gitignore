@@ -1,0 +1,23 @@
+# Local secrets and environment files
+.env*
+.dev.vars*
+
+# Cloudflare Workers local state
+.wrangler/
+
+# Dependency and build output
+node_modules/
+dist/
+build/
+
+# Package-manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
