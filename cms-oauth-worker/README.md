@@ -59,6 +59,7 @@ backend:
   branch: main
   base_url: https://<你的worker地址>
   auth_endpoint: auth
+  auth_scope: public_repo
 ```
 
 然后打开 `https://starsofdeduce.github.io/admin/` 点 **Sign in** 即可用 GitHub 一键登录。
@@ -70,12 +71,14 @@ backend:
 ## 说明与排错
 
 - **原理解析**：点击登录 → 弹窗到 `你的worker/auth` → 跳 GitHub 授权 → 你在 GitHub 批准 → GitHub 回调 `你的worker/callback` → Worker 用 `Client Secret` 换取 token → 通过 `postMessage` 把 token 弹回 CMS。**Client Secret 只在 Worker 服务器端，绝不进公开仓库。**
-- **ORIGINS 白名单**：只有该名单里的站点能发起登录，防止第三方站点借你的 OAuth App 偷 token（你有 2FA）。
+- **ORIGINS 白名单**：只填写精确主机名，例如 `starsofdeduce.github.io`。代码不接受 `*.github.io` 等通配符、协议或路径。
+- **最小权限**：Worker 会忽略请求参数中的 `scope`，固定请求 `public_repo`，避免 CMS 获得私有仓库权限。
 - **state 校验**：`/auth` 会设置 Cookie，`/callback` 会用它校验 state，防 CSRF。更新本目录代码后要重新部署 Worker，仓库提交本身不会更新 Worker。
+- **禁止缓存**：授权页和回调页均返回 `Cache-Control: no-store`，并设置 CSP、禁止嵌入和严格来源策略。
 - **Invalid Redirect URI**：检查 GitHub OAuth App（当前授权页显示 `PageOAuth`）中的 **Authorization callback URL** 是否与 `https://cmsgtio.account-subdomain.workers.dev/callback` 完全一致。若你更改的是另一个 OAuth App，此错误仍会出现。
 - **登录后所有提交都以你的 GitHub 身份直接 commit 到仓库。**
 - 若登录弹窗报错，看 Worker 后台 **Logs** 面板会显示具体原因。
-- **备选方案**：若暂时不想搭网关，可用 GitHub 个人访问令牌登录（见之前的说明），零额外服务。
+- **不要使用宽权限令牌作为备选方案**：若必须使用个人访问令牌，应选择 fine-grained token，并仅授权博客仓库和必要操作。
 
 ## 用 wrangler CLI（可选）
 

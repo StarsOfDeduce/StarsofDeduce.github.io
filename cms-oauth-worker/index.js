@@ -5,8 +5,7 @@
  * environment variables:
  *   OAUTH_CLIENT_ID      -> your GitHub OAuth App client id
  *   OAUTH_CLIENT_SECRET  -> your GitHub OAuth App client secret
- *   ORIGINS              -> comma-separated allowed site hosts, e.g. "starsofdeduce.github.io"
- *                          (wildcards supported: "*.github.io")
+ *   ORIGINS              -> comma-separated exact site hosts, e.g. "starsofdeduce.github.io"
  *
  * Protocol (matches Sveltia's `authorize()` in src/.../shared/auth.js):
  *   GET /auth      The CMS openAuth popup to this URL. We redirect to GitHub's authorize
@@ -23,41 +22,38 @@ const GITHUB = {
   token: 'https://github.com/login/oauth/access_token',
 };
 
-/** Parse the ORIGINS variable into hostname regex matchers. */
-function hostPatterns(raw) {
-  return (raw || '')
+/** Parse ORIGINS as exact HTTPS hostnames. Wildcards and URL components are rejected. */
+function exactHosts(raw) {
+  return [...new Set((raw || '')
     .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((p) => {
-      const re = p
-        .split('')
-        .map((ch) => {
-          if (ch === '*') return '.*';
-          if (ch === '.') return '\\.';
-          return /[a-zA-Z0-9-]/.test(ch) ? ch : `\\${ch}`;
-        })
-        .join('');
-      return new RegExp(`^${re}$`, 'i');
-    });
+    .map((host) => host.trim().toLowerCase())
+    .filter((host) => /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(host))
+  )];
 }
 
-function hostName(origin) {
-  try {
-    return new URL(origin).hostname;
-  } catch {
-    return '';
-  }
-}
+const exactOrigins = (hosts) => hosts.map((host) => `https://${host}`);
 
-function allowedHost(host, patterns) {
-  return patterns.some((re) => re.test(host));
-}
+const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[char]));
 
-const pageShell = (title, body, extraSetCookie = '') =>
-  new Response(
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>
-<style>
+const pageShell = (title, bodyFactory, extraSetCookie = '') => {
+  const nonce = crypto.randomUUID().replaceAll('-', '');
+  const body = typeof bodyFactory === 'function' ? bodyFactory(nonce) : bodyFactory;
+  const headers = {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store',
+    'content-security-policy': `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'`,
+    'permissions-policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    'referrer-policy': 'no-referrer',
+    'x-content-type-options': 'nosniff',
+    'x-frame-options': 'DENY',
+    ...(extraSetCookie ? { 'set-cookie': extraSetCookie } : {}),
+  };
+
+  return new Response(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(title)}</title>
+<style nonce="${nonce}">
   body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0d14;color:#e5e7eb}
   .card{max-width:420px;margin:24px;padding:36px 32px;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;backdrop-filter:blur(16px)}
   .dot{width:9px;height:9px;border-radius:50%;background:#00f2fe;box-shadow:0 0 12px #00f2fe;display:inline-block;margin-bottom:8px;animation:p 1.2s ease-in-out infinite alternate}
@@ -66,49 +62,48 @@ const pageShell = (title, body, extraSetCookie = '') =>
   p{color:#9ca3af;font-size:.9rem;line-height:1.6;margin:0}
   .err{color:#f87171}
 </style></head><body><div class="card"><span class="dot"></span>${body}</div></body></html>`,
-    { status: title.startsWith('错误') ? 400 : 200, headers: { 'content-type': 'text/html; charset=utf-8', ...(extraSetCookie ? { 'set-cookie': extraSetCookie } : {}) } },
+    { status: title.startsWith('错误') ? 400 : 200, headers },
   );
+};
 
-const clear = 'state=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0';
+const stateCookieName = '__Host-cms-oauth-state';
+const clear = `${stateCookieName}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`;
 
 /**
  * The window that GitHub just redirected to (the popup). Handshakes with the CMS, then
  * posts the token back. Mirrors vencax/netlify-cms-github-oauth-provider login_script.js.
  */
-function authPage(provider, content, allowedHosts, extraSetCookie) {
-  const originsJson = JSON.stringify(allowedHosts);
-  const payload = JSON.stringify(content);
-  const body = `
+function authPage(provider, content, allowedOrigins, extraSetCookie) {
+  const originsJson = JSON.stringify(allowedOrigins);
+  const providerJson = JSON.stringify(provider);
+  const payloadJson = JSON.stringify(JSON.stringify(content)).replaceAll('<', '\\u003c');
+  return pageShell('授权成功', (nonce) => `
   <h1>授权成功，即将返回后台…</h1>
   <p>若窗口未自动关闭，可直接关闭本窗口。</p>
-  <script>
+  <script nonce="${nonce}">
     (function () {
       var allowed = ${originsJson};
-      function hostAllowed(origin) {
-        var h;
-        try { h = new URL(origin).hostname; } catch (e) { return false; }
-        return allowed.some(function (p) {
-          try { return new RegExp('^' + p.replace(/\\./g, '\\\\.').replace('\\*', '.*') + '$', 'i').test(h); } catch (e) { return false; }
-        });
-      }
+      var provider = ${providerJson};
+      var payload = ${payloadJson};
       if (!window.opener) { return; }
       var posted = false;
       // Handshake: tell the CMS we are authorising
-      try { window.opener.postMessage('authorizing:${provider}', '*'); } catch (e) {}
+      allowed.forEach(function (origin) {
+        try { window.opener.postMessage('authorizing:' + provider, origin); } catch (e) {}
+      });
       window.addEventListener('message', function (e) {
         if (posted) { return; }
-        if (e.source !== window.opener || e.data !== 'authorizing:${provider}' || !hostAllowed(e.origin)) { return; }
+        if (e.source !== window.opener || e.data !== 'authorizing:' + provider || !allowed.includes(e.origin)) { return; }
         posted = true;
-        window.opener.postMessage('authorization:${provider}:success:${payload}', e.origin);
+        window.opener.postMessage('authorization:' + provider + ':success:' + payload, e.origin);
         setTimeout(function () { window.close(); }, 300);
       });
     })();
-  </script>`;
-  return pageShell('授权成功', body, extraSetCookie);
+  </script>`, extraSetCookie);
 }
 
 function errorPage(message, extraSetCookie) {
-  const body = `<h1 class="err">授权失败</h1><p>${message}<br>请刷新页面重试。</p>`;
+  const body = `<h1 class="err">授权失败</h1><p>${escapeHTML(message)}<br>请刷新页面重试。</p>`;
   return pageShell('错误', body, extraSetCookie);
 }
 
@@ -117,30 +112,32 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
     const base = url.origin; // e.g. https://starsofdeduce-cms-oauth.xxx.workers.dev
-    const patterns = hostPatterns(env.ORIGINS);
+    const hosts = exactHosts(env.ORIGINS);
+    const origins = exactOrigins(hosts);
 
     // ---- Start the OAuth flow (the popup URL) ----
     if (pathname === '/auth') {
       const siteId = url.searchParams.get('site_id') || '';
-      const scope = url.searchParams.get('scope') || 'repo';
-      // Only allow a site we recognise to start this flow.
-      if (siteId && !allowedHost(siteId, patterns)) {
+      // Require an exact configured site. Do not accept wildcard or omitted origins.
+      if (!siteId || !hosts.includes(siteId.toLowerCase())) {
         return errorPage('该站点未在 ORIGINS 白名单内。', '');
       }
       if (!env.OAUTH_CLIENT_ID) return errorPage('缺少 OAUTH_CLIENT_ID 配置。', '');
+      if (!env.OAUTH_CLIENT_SECRET) return errorPage('缺少 OAUTH_CLIENT_SECRET 配置。', '');
 
       const state = crypto.randomUUID();
       const authUrl = new URL(GITHUB.authorize);
       authUrl.searchParams.set('client_id', env.OAUTH_CLIENT_ID);
       authUrl.searchParams.set('redirect_uri', `${base}/callback`);
-      authUrl.searchParams.set('scope', scope);
+      // This public blog only needs write access to public repositories.
+      authUrl.searchParams.set('scope', 'public_repo');
       authUrl.searchParams.set('state', state);
 
       return new Response(null, {
         status: 302,
         headers: {
           Location: authUrl.toString(),
-          'Set-Cookie': `state=${state}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600`,
+          'Set-Cookie': `${stateCookieName}=${state}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600`,
           'Cache-Control': 'no-store',
         },
       });
@@ -151,7 +148,7 @@ export default {
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
       const cookie = request.headers.get('Cookie') || '';
-      const gotState = (cookie.match(/(?:^|;\s*)state=([^;]+)/) || [])[1];
+      const gotState = (cookie.match(new RegExp(`(?:^|;\\s*)${stateCookieName}=([^;]+)`)) || [])[1];
 
       if (!code) return errorPage('GitHub 未返回授权码。', clear);
       if (!gotState || gotState !== state) {
@@ -185,14 +182,12 @@ export default {
         );
       }
 
-      // Allowed CMS hosts (matches e.origin) -> postMessage target origin whitelist.
-      const allowedHosts = (env.ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
-      return authPage('github', content, allowedHosts, clear);
+      return authPage('github', content, origins, clear);
     }
 
     return new Response(
       'GitHub OAuth gateway for Sveltia CMS. Ready — use /auth to begin.',
-      { status: 200 },
+      { status: 200, headers: { 'cache-control': 'no-store', 'content-type': 'text/plain; charset=utf-8', 'referrer-policy': 'no-referrer', 'x-content-type-options': 'nosniff' } },
     );
   },
 };

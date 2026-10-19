@@ -12,7 +12,8 @@
     try { url = new URL(rawHref, location.href); } catch { return null; }
 
     const isWebLink = url.protocol === 'http:' || url.protocol === 'https:';
-    if (!isWebLink) return { url, scope: 'other' };
+    if (url.protocol === 'mailto:') return { url, scope: 'external' };
+    if (!isWebLink) return { url, scope: 'unsafe' };
 
     const isInternal = canonicalHosts.has(url.hostname.toLowerCase());
     return { url, scope: isInternal ? 'internal' : 'external' };
@@ -29,6 +30,11 @@
     } else if (resolved.scope === 'external') {
       if (link.getAttribute('target') !== '_blank') link.setAttribute('target', '_blank');
       if (link.getAttribute('rel') !== 'noopener noreferrer') link.setAttribute('rel', 'noopener noreferrer');
+    } else if (resolved.scope === 'unsafe') {
+      link.removeAttribute('href');
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
+      link.setAttribute('aria-disabled', 'true');
     }
   }
 

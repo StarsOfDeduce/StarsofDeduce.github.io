@@ -5,10 +5,12 @@ backend:
   # 指向自托管在 Cloudflare Worker 上的 GitHub OAuth 网关
   base_url: https://cmsgtio.account-subdomain.workers.dev
   auth_endpoint: auth
+  auth_scope: public_repo
 
 site_url: https://starsofdeduce.github.io
 display_url: https://starsofdeduce.github.io
-logo_url: https://starsofdeduce.github.io/avatar-cutout.png?v=20261018-12
+logo:
+  src: https://starsofdeduce.github.io/avatar-cutout.png?v=20261018-12
 
 # 文章配图 / 上传文件的存放位置
 media_folder: "assets/uploads"
