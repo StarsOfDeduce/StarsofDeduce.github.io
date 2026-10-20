@@ -3,7 +3,7 @@ backend:
   repo: StarsofDeduce/StarsofDeduce.github.io
   branch: main
   # 指向自托管在 Cloudflare Worker 上的 GitHub OAuth 网关
-  base_url: https://cmsgtio.account-subdomain.workers.dev
+  base_url: https://cms.avid.us.ci
   auth_endpoint: auth
   auth_scope: public_repo
 

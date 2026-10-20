@@ -17,7 +17,8 @@
 
 1. 打开 [Cloudflare 控制台](https://dash.cloudflare.com/) → 用 GitHub 登录（若无账号则注册，免费）
 2. 左侧 **Workers & Pages** → **Create** → **Worker**
-   - 现有 Worker 名称：`cmsgtio`，地址为 `https://cmsgtio.account-subdomain.workers.dev`
+   - Worker 名称可使用 `cmsgtio` 或其他不含个人信息的名称
+   - 地址格式为 `https://<worker-name>.<account-subdomain>.workers.dev`
    - 点 **Deploy** 部署
 3. 部署后点 **Edit code** → 清空默认内容，把本目录的 [`index.js`](./index.js) 全选粘贴进去 → **Deploy**
 4. 记下你的 Worker 地址，形如：
@@ -31,7 +32,7 @@
 2. 填写：
    - **Application name**：`StarsofDeduce CMS`
    - **Homepage URL**：`https://starsofdeduce.github.io`
-   - **Authorization callback URL**：`https://cmsgtio.account-subdomain.workers.dev/callback`
+   - **Authorization callback URL**：`https://<worker-name>.<account-subdomain>.workers.dev/callback`
      - ⚠️ 必须和步骤一的地址**完全一致**（结尾 `/callback`，不要带多余斜杠）
 3. 点 **Register application**
 4. 记下 **Client ID**；点 **Generate a new client secret** 记下 **Client Secret**（只显示一次）
@@ -75,7 +76,7 @@ backend:
 - **最小权限**：Worker 会忽略请求参数中的 `scope`，固定请求 `public_repo`，避免 CMS 获得私有仓库权限。
 - **state 校验**：`/auth` 会设置 Cookie，`/callback` 会用它校验 state，防 CSRF。更新本目录代码后要重新部署 Worker，仓库提交本身不会更新 Worker。
 - **禁止缓存**：授权页和回调页均返回 `Cache-Control: no-store`，并设置 CSP、禁止嵌入和严格来源策略。
-- **Invalid Redirect URI**：检查 GitHub OAuth App（当前授权页显示 `PageOAuth`）中的 **Authorization callback URL** 是否与 `https://cmsgtio.account-subdomain.workers.dev/callback` 完全一致。若你更改的是另一个 OAuth App，此错误仍会出现。
+- **Invalid Redirect URI**：检查 GitHub OAuth App 中的 **Authorization callback URL** 是否与 `https://<worker-name>.<account-subdomain>.workers.dev/callback` 完全一致。若你更改的是另一个 OAuth App，此错误仍会出现。
 - **登录后所有提交都以你的 GitHub 身份直接 commit 到仓库。**
 - 若登录弹窗报错，不要刷新 `/callback?code=...` 页面（GitHub 授权码只能使用一次）；关闭弹窗后从后台重新登录。页面会显示诊断编号，Worker 后台 **Logs** 会记录对应的 HTTP 状态和错误类型，但不会记录令牌或 Client Secret。
 - **不要使用宽权限令牌作为备选方案**：若必须使用个人访问令牌，应选择 fine-grained token，并仅授权博客仓库和必要操作。
@@ -94,3 +95,15 @@ wrangler secret put OAUTH_CLIENT_SECRET
 ```
 
 `wrangler.toml` 的名称已设为现有 Worker 的 `cmsgtio`。首次使用命令行部署前，请确认登录的是拥有该 Worker 的 Cloudflare 账号。
+
+## 更换包含个人信息的 workers.dev 子域
+
+Cloudflare 的 `workers.dev` 地址由 Worker 名称和账户子域共同组成。若账户子域包含邮箱、QQ 号或其他个人标识，请不要只修改本仓库里的 URL；那会直接中断 OAuth 登录。
+
+1. 在 Cloudflare 控制台进入 **Workers & Pages**。
+2. 在账户的 **Your subdomain** 旁选择 **Change**，换成不含个人信息的名称。
+3. 确认 Worker 的新地址可以访问。
+4. 将 GitHub OAuth App 的 callback 更新为新地址的 `/callback`。
+5. 最后同步修改 `admin/config.yml` 的 `base_url` 与 `admin/index.html` 的 CSP `connect-src`。
+
+切换完成后再清理旧地址；提交前可运行全文搜索，确认公开文件中不再包含旧账户子域。

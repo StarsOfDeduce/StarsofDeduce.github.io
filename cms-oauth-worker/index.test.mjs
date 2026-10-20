@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import worker from './index.js';
 
-const base = 'https://cmsgtio.account-subdomain.workers.dev';
+const base = 'https://cms-oauth.example.test';
 const env = {
   OAUTH_CLIENT_ID: 'test-client',
   OAUTH_CLIENT_SECRET: 'test-secret',
