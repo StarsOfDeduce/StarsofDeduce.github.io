@@ -7,6 +7,7 @@
   let activeHero = 0;
   let heroWheelLocked = false;
   const fallbackPosts = [
+    { id: 'aplomb-window-centering', title: 'Aplomb：把 Windows 窗口真正摆到正中', description: '从 DWM 可见边框、全局热键到无阻塞窗口枚举，记录一款克制的 Windows 窗口居中工具。', date: '2026-10-20', tags: ['Python', 'Windows'] },
     { id: 'tar-v-design', title: 'Tar V 架构与设计：打造 Windows 毛玻璃拟物风启动面板', description: '探索 Electron 进程分离架构、Win32 图标提取与界面设计。', date: '2026-10-10', tags: ['Electron', 'Windows'] },
     { id: 'windhawk-mods', title: '深入 WindHawk：用 C++ 重塑 Windows 11 交互体验', description: '解析动态注入、消息循环拦截与系统交互定制。', date: '2026-10-05', tags: ['C++', 'Windows 11'] },
     { id: 'glassmorphism-web', title: '探索极客美学：从毛玻璃拟物到 Bento Grid 现代化主页', description: '关于个人主页视觉系统与前端实现的阶段性记录。', date: '2026-10-01', tags: ['Web 前端', '设计系统'] }
@@ -66,15 +67,17 @@
   window.addEventListener('hashchange', () => setView(location.hash.slice(1), false)); setView(location.hash.slice(1), false);
   async function loadPosts() {
     try {
-      const cached = JSON.parse(sessionStorage.getItem('sod-post-index') || 'null');
+      const cached = JSON.parse(sessionStorage.getItem('sod-post-index-v2') || 'null');
       if (cached?.savedAt > Date.now() - 15 * 60 * 1000 && Array.isArray(cached.posts)) return cached.posts;
     } catch { /* Storage can be unavailable in privacy modes. */ }
     try {
       const response = await fetch('https://api.github.com/repos/StarsofDeduce/StarsofDeduce.github.io/contents/posts', { headers: { Accept: 'application/vnd.github+json' } }); if (!response.ok) throw new Error(`GitHub API ${response.status}`);
       const files = (await response.json()).filter(file => file.name.endsWith('.md'));
       const records = await Promise.all(files.map(async file => { const raw = await fetch(file.download_url).then(result => result.ok ? result.text() : Promise.reject(new Error('download failed'))); const { meta } = parseFrontmatter(raw); return { id: file.name.replace(/\.md$/i, ''), title: meta.title || file.name, description: meta.description || '暂无摘要', date: meta.date || '', tags: Array.isArray(meta.tags) ? meta.tags : [] }; }));
-      const posts = records.sort((a, b) => String(b.date).localeCompare(String(a.date)));
-      try { sessionStorage.setItem('sod-post-index', JSON.stringify({ savedAt: Date.now(), posts })); } catch { /* Optional cache. */ }
+      const remoteIds = new Set(records.map(post => post.id));
+      const posts = [...records, ...fallbackPosts.filter(post => !remoteIds.has(post.id))]
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      try { sessionStorage.setItem('sod-post-index-v2', JSON.stringify({ savedAt: Date.now(), posts })); } catch { /* Optional cache. */ }
       return posts;
     } catch (error) { console.warn('Using local post index fallback:', error); return fallbackPosts; }
   }
